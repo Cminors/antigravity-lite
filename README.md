@@ -1,14 +1,14 @@
 # Antigravity Lite
 
-轻量级 API 网关，为无图形界面的 Linux 服务器设计。
+轻量级 API 网关，为无图形界面的 Linux 服务器设计。**克隆项目后，全部在 Web 管理界面配置！**
 
 ## 功能特性
 
-- 🔐 **账号管理** - 多账号管理，支持导入导出
+- 🔐 **账号管理** - 多账号管理，支持批量导入、类型筛选（PRO/ULTRA/FREE）
 - 🔌 **API 代理** - 兼容 OpenAI/Anthropic 协议
-- 🔀 **模型路由** - 灵活的模型别名映射
-- 📊 **配额监控** - 请求统计和使用分析
-- 🌐 **Web 界面** - 现代暗色主题管理面板
+- 🛤️ **模型路由** - Web 端管理，一键应用预设映射
+- 📊 **调度模式** - 缓存优先/平衡轮换/性能优先
+- 🌐 **Web 界面** - 现代暗色主题管理面板，全功能配置
 
 ## 资源占用
 
@@ -67,16 +67,7 @@ GOOGLE_CLIENT_ID=你的客户端ID.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=你的客户端密钥
 ```
 
-#### 第四步：编辑配置文件（可选）
-
-```bash
-# 编辑配置文件
-nano config.yaml
-```
-
-可以根据需要修改端口、数据库路径等配置。
-
-#### 第五步：启动服务
+#### 第四步：启动服务
 
 ```bash
 # 使用 Docker Compose 一键启动
@@ -89,7 +80,7 @@ docker-compose ps
 docker-compose logs -f
 ```
 
-#### 第六步：访问 Web 管理界面
+#### 第五步：访问 Web 管理界面配置一切
 
 打开浏览器，访问：
 
@@ -97,38 +88,13 @@ docker-compose logs -f
 http://your-server-ip:8045
 ```
 
+**所有配置都可以在 Web 界面完成！** 无需再手动编辑任何配置文件。
+
 ---
 
 ### 方式二：手动编译部署
 
 > 适合需要自定义编译或无法使用 Docker 的用户。
-
-#### 第一步：安装 Go 环境
-
-**Ubuntu/Debian:**
-
-```bash
-# 下载 Go 1.21+
-wget https://go.dev/dl/go1.21.0.linux-amd64.tar.gz
-
-# 解压到 /usr/local
-sudo tar -C /usr/local -xzf go1.21.0.linux-amd64.tar.gz
-
-# 添加到 PATH（写入 ~/.bashrc）
-echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
-source ~/.bashrc
-
-# 验证安装
-go version
-```
-
-**CentOS/RHEL:**
-
-```bash
-sudo yum install golang
-```
-
-#### 第二步：克隆并编译
 
 ```bash
 # 克隆项目
@@ -138,37 +104,8 @@ cd antigravity-lite
 # 下载依赖
 go mod tidy
 
-# 编译（本机运行）
+# 编译
 go build -o antigravity-lite .
-
-# 或：交叉编译 Linux amd64 版本（在 Windows/Mac 上编译给 Linux 用）
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o antigravity-lite-linux-amd64 .
-```
-
-#### 第三步：上传到服务器
-
-```bash
-# 在服务器上创建目录
-ssh user@your-server "mkdir -p /opt/antigravity-lite"
-
-# 上传二进制文件
-scp antigravity-lite-linux-amd64 user@your-server:/opt/antigravity-lite/antigravity-lite
-
-# 上传配置文件
-scp config.yaml user@your-server:/opt/antigravity-lite/
-```
-
-#### 第四步：在服务器上配置并运行
-
-```bash
-# SSH 登录到服务器
-ssh user@your-server
-
-# 进入应用目录
-cd /opt/antigravity-lite
-
-# 赋予执行权限
-chmod +x antigravity-lite
 
 # 设置环境变量并运行
 export GOOGLE_CLIENT_ID="你的客户端ID"
@@ -176,19 +113,138 @@ export GOOGLE_CLIENT_SECRET="你的客户端密钥"
 ./antigravity-lite
 ```
 
+然后访问 `http://localhost:8045` 进行 Web 端配置。
+
 ---
 
-### 方式三：使用 Systemd 服务（生产环境推荐）
+## Web 管理界面功能
 
-> 适合需要开机自启、后台运行的生产环境。
+### 📊 Dashboard
 
-#### 第一步：创建服务文件
+实时显示账号数量、活跃账号、今日请求数、平均延迟等统计信息。
 
-```bash
-sudo nano /etc/systemd/system/antigravity-lite.service
+### 🔐 Accounts（账号管理）
+
+| 功能 | 说明 |
+|------|------|
+| **搜索过滤** | 按邮箱搜索，按类型筛选（PRO/ULTRA/FREE） |
+| **批量导入** | 一次性粘贴多个 Token，自动识别格式 |
+| **多方式添加** | Refresh Token / OAuth 授权 / 数据库导入 |
+| **状态检测** | 一键检测所有账号状态 |
+| **导入导出** | JSON 格式导入导出账号 |
+
+#### 添加账号支持的格式
+
+1. **单个 Token**：`1//xxxxx...`
+2. **JSON 数组**：`[{"refresh_token": "1//..."}]`
+3. **任意文本**：自动提取包含的 Token
+
+### 🛤️ Model Router（模型路由）
+
+在 Web 端直接管理模型映射，无需编辑配置文件！
+
+| 功能 | 说明 |
+|------|------|
+| **自定义映射** | 添加源模型→目标模型的映射规则 |
+| **预设映射** | ✨ 一键应用常用映射配置 |
+| **重置映射** | 🔄 清空所有映射 |
+
+**预设映射包括：**
+
+```
+claude-haiku-*     → gemini-2.5-flash-lite
+claude-3-haiku-*   → gemini-2.5-flash-lite
+claude-3-5-sonnet-* → claude-sonnet-4-5
+claude-3-opus-*    → claude-opus-4-5-thinking
+gpt-4o*            → gemini-3-flash
+gpt-4*             → gemini-3-pro-high
+gpt-3.5*           → gemini-2.5-flash
+o1-*               → gemini-3-pro-high
 ```
 
-粘贴以下内容：
+### ⚙️ Settings（服务配置）
+
+#### 基础配置
+
+| 配置项 | 说明 |
+|--------|------|
+| **监听端口** | 默认 8045 |
+| **请求超时** | 范围 30-3600 秒，默认 120 秒 |
+| **局域网访问** | 开启后允许局域网其他设备访问 |
+| **访问授权** | 开启后需要 API 密钥验证 |
+
+#### API 密钥
+
+- 显示当前 API 密钥
+- 🔄 刷新生成新密钥
+- 📋 一键复制密钥
+
+#### 调度模式
+
+| 模式 | 说明 | 适用场景 |
+|------|------|----------|
+| **缓存优先** | 绑定会话与账号，限流时继续等待 | 最大化 Prompt Cache 命中率 |
+| **平衡轮换** | 绑定会话，限流时自动切换账号 | 兼顾缓存与可用性（推荐） |
+| **性能优先** | 无会话绑定，纯随机轮换 | 高并发场景 |
+
+还可以设置 **最大等待时长**（0-300 秒）。
+
+---
+
+## API 使用示例
+
+### Python (OpenAI SDK)
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="http://127.0.0.1:8045/v1",
+    api_key="your-api-key"  # 从 Web 界面获取
+)
+
+response = client.chat.completions.create(
+    model="claude-sonnet-4-5",
+    messages=[{"role": "user", "content": "Hello!"}]
+)
+
+print(response.choices[0].message.content)
+```
+
+### Claude CLI
+
+```bash
+export ANTHROPIC_API_KEY="your-api-key"
+export ANTHROPIC_BASE_URL="http://127.0.0.1:8045"
+claude
+```
+
+### cURL
+
+```bash
+curl http://127.0.0.1:8045/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer your-api-key" \
+  -d '{
+    "model": "claude-sonnet-4-5",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'
+```
+
+---
+
+## 环境变量
+
+| 变量名 | 必需 | 说明 | 示例 |
+|--------|------|------|------|
+| `GOOGLE_CLIENT_ID` | ✅ 是 | Google OAuth 客户端 ID | `123456789.apps.googleusercontent.com` |
+| `GOOGLE_CLIENT_SECRET` | ✅ 是 | Google OAuth 客户端密钥 | `GOCSPX-xxxxxx` |
+
+---
+
+## 使用 Systemd 服务（生产环境推荐）
+
+创建服务文件 `/etc/systemd/system/antigravity-lite.service`：
 
 ```ini
 [Unit]
@@ -209,120 +265,12 @@ RestartSec=5
 WantedBy=multi-user.target
 ```
 
-#### 第二步：启用并启动服务
+启动服务：
 
 ```bash
-# 重新加载 systemd 配置
 sudo systemctl daemon-reload
-
-# 启用开机自启
 sudo systemctl enable antigravity-lite
-
-# 启动服务
 sudo systemctl start antigravity-lite
-
-# 查看服务状态
-sudo systemctl status antigravity-lite
-
-# 查看实时日志
-sudo journalctl -u antigravity-lite -f
-```
-
-#### 第三步：常用管理命令
-
-```bash
-# 停止服务
-sudo systemctl stop antigravity-lite
-
-# 重启服务
-sudo systemctl restart antigravity-lite
-
-# 禁用开机自启
-sudo systemctl disable antigravity-lite
-```
-
----
-
-## 环境变量
-
-| 变量名 | 必需 | 说明 | 示例 |
-|--------|------|------|------|
-| `GOOGLE_CLIENT_ID` | ✅ 是 | Google OAuth 客户端 ID | `123456789.apps.googleusercontent.com` |
-| `GOOGLE_CLIENT_SECRET` | ✅ 是 | Google OAuth 客户端密钥 | `GOCSPX-xxxxxx` |
-
----
-
-## API 使用示例
-
-### Python (OpenAI SDK)
-
-```bash
-# 安装 OpenAI SDK
-pip install openai
-```
-
-```python
-from openai import OpenAI
-
-# 创建客户端，指向本地网关
-client = OpenAI(
-    base_url="http://127.0.0.1:8045/v1",
-    api_key="your-api-key"  # 从 Web 界面获取
-)
-
-# 发送请求
-response = client.chat.completions.create(
-    model="claude-sonnet-4-5",
-    messages=[
-        {"role": "user", "content": "Hello, how are you?"}
-    ]
-)
-
-# 打印回复
-print(response.choices[0].message.content)
-```
-
-### Claude CLI
-
-```bash
-# 设置环境变量
-export ANTHROPIC_API_KEY="your-api-key"
-export ANTHROPIC_BASE_URL="http://127.0.0.1:8045"
-
-# 启动 Claude CLI
-claude
-```
-
-### cURL
-
-```bash
-curl http://127.0.0.1:8045/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer your-api-key" \
-  -d '{
-    "model": "claude-sonnet-4-5",
-    "messages": [
-      {"role": "user", "content": "Hello!"}
-    ]
-  }'
-```
-
----
-
-## 配置文件说明
-
-编辑 `config.yaml` 自定义配置：
-
-```yaml
-server:
-  port: 8045           # 服务端口
-  host: "0.0.0.0"      # 监听地址
-
-database:
-  path: "./data/antigravity.db"  # SQLite 数据库路径
-
-logging:
-  level: "info"        # 日志级别: debug, info, warn, error
 ```
 
 ---
@@ -331,19 +279,18 @@ logging:
 
 ### Q: 无法访问 Web 界面？
 
-1. 检查防火墙是否开放了 8045 端口：
-   ```bash
-   sudo ufw allow 8045
-   ```
-2. 检查服务是否正常运行：
-   ```bash
-   sudo systemctl status antigravity-lite
-   ```
+```bash
+# 检查防火墙
+sudo ufw allow 8045
+
+# 检查服务状态
+sudo systemctl status antigravity-lite
+```
 
 ### Q: Google OAuth 登录失败？
 
 1. 确保 **重定向 URI** 配置正确
-2. 确保环境变量 `GOOGLE_CLIENT_ID` 和 `GOOGLE_CLIENT_SECRET` 设置正确
+2. 确保环境变量设置正确
 3. 检查服务器时间是否准确
 
 ### Q: 如何更新到最新版本？
@@ -354,14 +301,6 @@ cd antigravity-lite
 git pull
 docker-compose down
 docker-compose up -d --build
-```
-
-**二进制方式：**
-```bash
-# 下载新版本二进制文件并替换
-sudo systemctl stop antigravity-lite
-# 替换二进制文件...
-sudo systemctl start antigravity-lite
 ```
 
 ---

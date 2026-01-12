@@ -25,8 +25,8 @@
                     <span>Accounts</span>
                 </li>
                 <li class="nav-item" data-page="routes">
-                    <span class="nav-icon">🔀</span>
-                    <span>Routes</span>
+                    <span class="nav-icon">🛤️</span>
+                    <span>Model Router</span>
                 </li>
                 <li class="nav-item" data-page="logs">
                     <span class="nav-icon">📝</span>
@@ -46,6 +46,7 @@
         </nav>
 
         <main class="main-content">
+            <!-- Dashboard -->
             <div id="page-dashboard" class="page active">
                 <div class="page-header">
                     <h1>Dashboard</h1>
@@ -113,6 +114,7 @@
                 </div>
             </div>
 
+            <!-- Accounts -->
             <div id="page-accounts" class="page">
                 <div class="page-header">
                     <h1>Accounts</h1>
@@ -120,66 +122,95 @@
                         <button class="btn btn-secondary" onclick="checkAllAccounts()">
                             <span>🔍</span> Check All
                         </button>
-                        <button class="btn btn-secondary" onclick="showImportModal()">
-                            <span>📥</span> Import
-                        </button>
                         <button class="btn btn-secondary" onclick="exportAccounts()">
                             <span>📤</span> Export
                         </button>
                         <button class="btn btn-primary" onclick="showAddAccountModal()">
-                            <span>➕</span> Add Account
+                            <span>➕</span> 添加账号
                         </button>
                     </div>
                 </div>
 
+                <!-- Filter Bar -->
+                <div class="filter-bar">
+                    <input type="text" id="account-search" placeholder="🔍 搜索邮箱..." onkeyup="filterAccounts()">
+                    <div class="filter-tabs">
+                        <button class="filter-tab active" data-filter="all">全部 <span class="count"
+                                id="count-all">0</span></button>
+                        <button class="filter-tab" data-filter="pro">PRO <span class="count"
+                                id="count-pro">0</span></button>
+                        <button class="filter-tab" data-filter="ultra">ULTRA <span class="count"
+                                id="count-ultra">0</span></button>
+                        <button class="filter-tab" data-filter="free">FREE <span class="count"
+                                id="count-free">0</span></button>
+                    </div>
+                </div>
+
                 <div class="card">
-                    <table class="data-table">
+                    <table class="data-table accounts-table">
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Type</th>
-                                <th>Status</th>
-                                <th>Last Used</th>
-                                <th>Actions</th>
+                                <th style="width:30px">⋮⋮</th>
+                                <th>邮箱</th>
+                                <th>模型配额</th>
+                                <th>最后使用</th>
+                                <th>操作</th>
                             </tr>
                         </thead>
                         <tbody id="accounts-table">
                             <tr>
-                                <td colspan="6" class="loading">Loading...</td>
+                                <td colspan="5" class="loading">Loading...</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
+            <!-- Model Router -->
             <div id="page-routes" class="page">
                 <div class="page-header">
-                    <h1>Model Routes</h1>
-                    <button class="btn btn-primary" onclick="saveRoutes()">
-                        <span>💾</span> Save
-                    </button>
+                    <div class="page-title-section">
+                        <h1>🛤️ 模型路由中心 (Model Router)</h1>
+                        <p class="page-subtitle">通过通配符或精确映射自定义模型路由规则</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary" onclick="applyPresetMappings()">
+                            <span>✨</span> 应用预设映射
+                        </button>
+                        <button class="btn btn-secondary" onclick="resetMappings()">
+                            <span>🔄</span> 重置映射
+                        </button>
+                        <button class="btn btn-primary" onclick="saveRoutes()">
+                            <span>💾</span> 保存
+                        </button>
+                    </div>
                 </div>
 
                 <div class="card">
-                    <p class="card-description">Configure model alias mappings.</p>
-                    <div id="routes-container"></div>
+                    <div class="section-header">
+                        <h3>▸ 自定义映射 (CUSTOM MAPPINGS)</h3>
+                    </div>
+                    <p class="section-subtitle">当前映射列表 (CUSTOM LIST)</p>
+                    <div id="routes-container" class="mappings-grid"></div>
                     <button class="btn btn-secondary" onclick="addRouteRow()" style="margin-top: 1rem;">
-                        <span>➕</span> Add Mapping
+                        <span>➕</span> 添加映射
                     </button>
                 </div>
 
-                <div class="card">
-                    <h3>Available Models</h3>
+                <div class="card" style="margin-top: 1rem;">
+                    <h3>可用模型</h3>
                     <div class="preset-models">
+                        <span class="model-tag">gemini-2.5-flash</span>
+                        <span class="model-tag">gemini-2.5-pro</span>
                         <span class="model-tag">gemini-2.0-flash</span>
                         <span class="model-tag">gemini-2.0-pro</span>
-                        <span class="model-tag">gemini-1.5-flash</span>
-                        <span class="model-tag">gemini-1.5-pro</span>
+                        <span class="model-tag">claude-sonnet-4-5</span>
+                        <span class="model-tag">claude-opus-4-5-thinking</span>
                     </div>
                 </div>
             </div>
 
+            <!-- Logs -->
             <div id="page-logs" class="page">
                 <div class="page-header">
                     <h1>Request Logs</h1>
@@ -209,34 +240,156 @@
                 </div>
             </div>
 
+            <!-- Settings -->
             <div id="page-settings" class="page">
                 <div class="page-header">
-                    <h1>Settings</h1>
+                    <div class="page-title-section">
+                        <h1>⚙️ 服务配置</h1>
+                        <span class="service-status" id="service-status">● 服务运行中 (0 个账号)</span>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary" onclick="openMonitor()">
+                            <span>📊</span> 打开监控
+                        </button>
+                        <button class="btn btn-danger" onclick="toggleService()" id="btn-toggle-service">
+                            <span>⏹</span> 停止服务
+                        </button>
+                    </div>
                 </div>
 
-                <div class="card">
-                    <h3>Proxy Settings</h3>
-                    <div class="form-group">
-                        <label>Request Timeout (seconds)</label>
-                        <input type="number" id="config-timeout" value="120" min="10" max="600">
+                <!-- Service Config Card -->
+                <div class="card config-card">
+                    <div class="config-grid">
+                        <div class="config-item">
+                            <label>监听端口 <span class="info-icon" title="默认 8045，修改端口需重启服务">ⓘ</span></label>
+                            <input type="number" id="config-port" value="8045" min="1000" max="65535">
+                            <p class="config-hint">默认 8045，修改端口需重启服务</p>
+                        </div>
+                        <div class="config-item">
+                            <label>请求超时 <span class="info-icon" title="范围 30-3600 秒">ⓘ</span></label>
+                            <div class="input-with-suffix">
+                                <input type="number" id="config-timeout" value="120" min="30" max="3600">
+                                <span class="suffix">秒</span>
+                            </div>
+                            <p class="config-hint">默认 120 秒，范围 30-3600 秒，修改后需重启服务生效</p>
+                        </div>
+                        <div class="config-item">
+                            <label class="toggle-label">
+                                <span>跟随应用自动启动 <span class="info-icon">ⓘ</span></span>
+                                <label class="toggle">
+                                    <input type="checkbox" id="config-autostart" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </label>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Max Retries</label>
-                        <input type="number" id="config-retries" value="3" min="0" max="10">
+
+                    <div class="config-row">
+                        <div class="config-item">
+                            <label>允许局域网访问 <span class="info-icon">ⓘ</span></label>
+                            <label class="toggle">
+                                <input type="checkbox" id="config-lan-access">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <p class="config-hint">🔒 仅监听 127.0.0.1，仅本机可访问（隐私优先）</p>
+                            <p class="config-hint warning">⚠ 需要重启服务后生效</p>
+                        </div>
+                        <div class="config-item">
+                            <label>访问授权 <span class="info-icon">ⓘ</span></label>
+                            <div class="auth-config">
+                                <span>已启用</span>
+                                <label class="toggle">
+                                    <input type="checkbox" id="config-auth-enabled">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>模式</label>
+                                <select id="config-auth-mode">
+                                    <option value="open">关闭（开放）</option>
+                                    <option value="bearer">Bearer Token</option>
+                                </select>
+                            </div>
+                            <p class="config-hint">开启后客户端需通过 Authorization: Bearer ... 传入 API 密钥</p>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="config-autorotate" checked>
-                            <span>Auto-rotate accounts on 429/401</span>
-                        </label>
+
+                    <div class="api-key-section">
+                        <label>API 密钥 <span class="info-icon">ⓘ</span></label>
+                        <div class="api-key-display">
+                            <code id="api-key-value">sk-xxxxxxxxxxxxxxxxxxxxx</code>
+                            <button class="btn btn-sm btn-secondary" onclick="refreshApiKey()">
+                                <span>🔄</span>
+                            </button>
+                            <button class="btn btn-sm btn-secondary" onclick="copyApiKey()">
+                                <span>📋</span>
+                            </button>
+                        </div>
+                        <p class="config-hint warning">注意：请妥善保管您的 API 密钥，不要泄露给他人。</p>
                     </div>
-                    <button class="btn btn-primary" onclick="saveConfig()">
-                        <span>💾</span> Save Settings
+                </div>
+
+                <!-- Scheduling Mode Card -->
+                <div class="card config-card" style="margin-top: 1rem;">
+                    <div class="scheduling-header">
+                        <h3>调度模式 <span class="info-icon">ⓘ</span></h3>
+                        <button class="btn btn-sm btn-secondary" onclick="clearSessionBinding()">
+                            <span>🗑️</span> 清除会话绑定
+                        </button>
+                    </div>
+
+                    <div class="scheduling-content">
+                        <div class="schedule-modes">
+                            <label class="mode-option">
+                                <input type="radio" name="schedule-mode" value="cache">
+                                <div class="mode-card">
+                                    <strong>缓存优先 (Cache First)</strong>
+                                    <p>绑定会话与账号，限流时继续等待（最大化 Prompt Cache 命中率）。</p>
+                                </div>
+                            </label>
+                            <label class="mode-option">
+                                <input type="radio" name="schedule-mode" value="balance" checked>
+                                <div class="mode-card active">
+                                    <strong>平衡轮换 (Balance)</strong>
+                                    <p>绑定会话，限流时自动热切换至可用账号（兼顾缓存与可用性）。</p>
+                                </div>
+                            </label>
+                            <label class="mode-option">
+                                <input type="radio" name="schedule-mode" value="performance">
+                                <div class="mode-card">
+                                    <strong>性能优先 (Performance)</strong>
+                                    <p>无会话绑定，纯随机轮换（适合高并发，不考虑缓存）。</p>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="wait-time-section">
+                            <label>最大等待时长 (秒) <span class="info-icon">ⓘ</span></label>
+                            <div class="slider-container">
+                                <input type="range" id="config-wait-time" min="0" max="300" value="60"
+                                    oninput="updateWaitTimeDisplay(this.value)">
+                                <span class="slider-value" id="wait-time-value">60s</span>
+                            </div>
+                            <div class="slider-labels">
+                                <span>0s</span>
+                                <span>300s</span>
+                            </div>
+                            <p class="config-hint info">💡 提示：针对全协议客户端优化 Prompt Caching 和限流处理 (OpenAI/Gemini/Claude)。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Save Button -->
+                <div class="settings-footer">
+                    <button class="btn btn-primary btn-lg" onclick="saveConfig()">
+                        <span>💾</span> 保存设置
                     </button>
                 </div>
 
-                <div class="card">
-                    <h3>Usage Examples</h3>
+                <!-- Usage Examples -->
+                <div class="card" style="margin-top: 1rem;">
+                    <h3>使用示例</h3>
                     <div class="code-block">
                         <p><strong>Python (OpenAI SDK):</strong></p>
                         <pre><code>from openai import OpenAI
@@ -264,57 +417,84 @@ claude</code></pre>
         </main>
     </div>
 
+    <!-- Add Account Modal (Multi-tab) -->
     <div id="modal-add-account" class="modal">
-        <div class="modal-content">
+        <div class="modal-content modal-lg">
             <div class="modal-header">
-                <h2>Add Account</h2>
+                <h2>添加新账号</h2>
                 <button class="modal-close" onclick="closeModal('modal-add-account')">&times;</button>
             </div>
+            <div class="modal-tabs">
+                <button class="modal-tab" data-tab="oauth" onclick="switchAccountTab('oauth')">OAuth 授权</button>
+                <button class="modal-tab active" data-tab="token" onclick="switchAccountTab('token')">Refresh
+                    Token</button>
+                <button class="modal-tab" data-tab="database" onclick="switchAccountTab('database')">从数据库导入</button>
+            </div>
             <div class="modal-body">
-                <div class="form-group">
-                    <label>Name *</label>
-                    <input type="text" id="account-name" placeholder="My Account 1">
+                <!-- OAuth Tab -->
+                <div class="tab-content" id="tab-oauth">
+                    <div class="oauth-section">
+                        <p class="info-text">通过 Google OAuth 授权获取 Refresh Token</p>
+                        <button class="btn btn-primary btn-lg" onclick="startOAuthFlow()">
+                            <span>🔐</span> 开始 OAuth 授权
+                        </button>
+                        <p class="config-hint">需要配置 GOOGLE_CLIENT_ID 和 GOOGLE_CLIENT_SECRET 环境变量</p>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="account-email" placeholder="example@gmail.com">
-                </div>
-                <div class="form-group">
-                    <label>Refresh Token *</label>
-                    <textarea id="account-token" rows="4" placeholder="Paste your Refresh Token here"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Account Type</label>
-                    <select id="account-type">
-                        <option value="free">Free</option>
-                        <option value="pro">Pro</option>
-                        <option value="ultra">Ultra</option>
-                    </select>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal('modal-add-account')">Cancel</button>
-                <button class="btn btn-primary" onclick="addAccount()">Add</button>
-            </div>
-        </div>
-    </div>
 
-    <div id="modal-import" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Import Accounts</h2>
-                <button class="modal-close" onclick="closeModal('modal-import')">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>JSON Data</label>
-                    <textarea id="import-data" rows="10"
-                        placeholder='[{"name": "Account 1", "refresh_token": "1//xxx..."}]'></textarea>
+                <!-- Token Tab -->
+                <div class="tab-content active" id="tab-token">
+                    <div class="form-group">
+                        <label>Refresh Token</label>
+                        <textarea id="account-token" rows="6" placeholder="在此处粘贴您的 Refresh Token（支持批量）"></textarea>
+                    </div>
+                    <div class="token-formats">
+                        <p class="hint-title">支持格式：</p>
+                        <ol class="format-list">
+                            <li>单个 Token (1//...)</li>
+                            <li>JSON 数组（含 refresh_token 字段）</li>
+                            <li>任意包含 Token 的文本（自动提取）</li>
+                        </ol>
+                    </div>
+                    <p class="config-hint info">💡 提示：支持一次性粘贴多个 Token 或 JSON 数组，系统将自动识别并批量导入。</p>
+
+                    <div class="form-group" style="margin-top: 1rem;">
+                        <label>账号类型（可选）</label>
+                        <select id="account-type">
+                            <option value="free">Free</option>
+                            <option value="pro">Pro</option>
+                            <option value="ultra">Ultra</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Database Tab -->
+                <div class="tab-content" id="tab-database">
+                    <div class="form-group">
+                        <label>数据库类型</label>
+                        <select id="db-type">
+                            <option value="sqlite">SQLite</option>
+                            <option value="mysql">MySQL</option>
+                            <option value="postgres">PostgreSQL</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>连接字符串</label>
+                        <input type="text" id="db-connection"
+                            placeholder="例如: ./accounts.db 或 user:pass@tcp(host:3306)/dbname">
+                    </div>
+                    <div class="form-group">
+                        <label>表名</label>
+                        <input type="text" id="db-table" placeholder="accounts" value="accounts">
+                    </div>
+                    <button class="btn btn-secondary" onclick="testDbConnection()">
+                        <span>🔌</span> 测试连接
+                    </button>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal('modal-import')">Cancel</button>
-                <button class="btn btn-primary" onclick="importAccounts()">Import</button>
+                <button class="btn btn-secondary" onclick="closeModal('modal-add-account')">取消</button>
+                <button class="btn btn-primary" onclick="addAccountFromModal()">确认添加</button>
             </div>
         </div>
     </div>

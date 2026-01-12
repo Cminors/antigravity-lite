@@ -1,6 +1,8 @@
 package config
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"os"
 	"sync"
 
@@ -16,16 +18,22 @@ type Config struct {
 }
 
 type ServerConfig struct {
-	Port     int    `yaml:"port"`
-	Host     string `yaml:"host"`
-	LogLevel string `yaml:"log_level"`
+	Port        int    `yaml:"port" json:"port"`
+	Host        string `yaml:"host" json:"host"`
+	LogLevel    string `yaml:"log_level" json:"log_level"`
+	APIKey      string `yaml:"api_key" json:"api_key"`
+	AuthEnabled bool   `yaml:"auth_enabled" json:"auth_enabled"`
+	LANAccess   bool   `yaml:"lan_access" json:"lan_access"`
+	AutoStart   bool   `yaml:"autostart" json:"autostart"`
 }
 
 type ProxyConfig struct {
-	Timeout       int  `yaml:"timeout"`
-	MaxRetries    int  `yaml:"max_retries"`
-	AutoRotate    bool `yaml:"auto_rotate"`
-	StreamEnabled bool `yaml:"stream_enabled"`
+	Timeout       int    `yaml:"timeout" json:"timeout"`
+	MaxRetries    int    `yaml:"max_retries" json:"max_retries"`
+	AutoRotate    bool   `yaml:"auto_rotate" json:"auto_rotate"`
+	StreamEnabled bool   `yaml:"stream_enabled" json:"stream_enabled"`
+	ScheduleMode  string `yaml:"schedule_mode" json:"schedule_mode"`
+	MaxWaitTime   int    `yaml:"max_wait_time" json:"max_wait_time"`
 }
 
 type StorageConfig struct {
@@ -47,15 +55,21 @@ var (
 func DefaultConfig() *Config {
 	return &Config{
 		Server: ServerConfig{
-			Port:     8045,
-			Host:     "0.0.0.0",
-			LogLevel: "info",
+			Port:        8045,
+			Host:        "127.0.0.1",
+			LogLevel:    "info",
+			APIKey:      GenerateAPIKey(),
+			AuthEnabled: false,
+			LANAccess:   false,
+			AutoStart:   true,
 		},
 		Proxy: ProxyConfig{
 			Timeout:       120,
 			MaxRetries:    3,
 			AutoRotate:    true,
 			StreamEnabled: true,
+			ScheduleMode:  "balance",
+			MaxWaitTime:   60,
 		},
 		Storage: StorageConfig{
 			DBPath:     "./data/antigravity.db",
@@ -117,4 +131,13 @@ func Get() *Config {
 		return DefaultConfig()
 	}
 	return cfg
+}
+
+// GenerateAPIKey generates a random API key
+func GenerateAPIKey() string {
+	bytes := make([]byte, 24)
+	if _, err := rand.Read(bytes); err != nil {
+		return "sk-default-key-please-regenerate"
+	}
+	return "sk-" + hex.EncodeToString(bytes)
 }
