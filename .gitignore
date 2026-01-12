@@ -1,0 +1,33 @@
+# Binaries
+antigravity-lite
+antigravity-lite-linux
+antigravity-lite.exe
+*.exe
+
+# Environment (contains secrets)
+.env
+*.dll
+*.so
+*.dylib
+
+# Data
+data/
+*.db
+*.db-journal
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Secrets (never commit real tokens)
+# config.yaml  # Uncomment if you want to exclude config

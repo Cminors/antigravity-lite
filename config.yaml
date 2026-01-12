@@ -1,0 +1,59 @@
+# Antigravity Lite 配置文件
+
+server:
+  # 监听端口
+  port: 8045
+  # 监听地址 (0.0.0.0 表示所有接口)
+  host: "0.0.0.0"
+  # 日志级别: debug, info, warn, error
+  log_level: "info"
+
+proxy:
+  # 请求超时时间（秒）
+  timeout: 120
+  # 遇到错误时最大重试次数
+  max_retries: 3
+  # 是否自动轮换账号（当遇到 429/401 错误时）
+  auto_rotate: true
+  # 是否启用流式响应
+  stream_enabled: true
+
+storage:
+  # 数据库文件路径
+  db_path: "./data/antigravity.db"
+  # Token 加密密钥（可选，留空则不加密）
+  encrypt_key: ""
+
+# 模型路由映射 (支持通配符 *)
+routes:
+  # OpenAI GPT-4 系列
+  - pattern: "gpt-4*"
+    target: "gemini-3-pro-high"
+  - pattern: "gpt-4o*"
+    target: "gemini-3-flash"
+  
+  # OpenAI GPT-3.5 系列
+  - pattern: "gpt-3.5*"
+    target: "gemini-2.5-flash"
+  
+  # OpenAI o1/o3 推理系列
+  - pattern: "o1-*"
+    target: "gemini-3-pro-high"
+  - pattern: "o3-*"
+    target: "gemini-3-pro-high"
+  
+  # Anthropic Claude Haiku 系列 (轻量)
+  - pattern: "claude-3-haiku-*"
+    target: "gemini-2.5-flash-lite"
+  - pattern: "claude-haiku-*"
+    target: "gemini-2.5-flash-lite"
+  
+  # Anthropic Claude Sonnet 系列
+  - pattern: "claude-3-5-sonnet-*"
+    target: "claude-sonnet-4-5"
+  
+  # Anthropic Claude Opus 系列 (高级)
+  - pattern: "claude-3-opus-*"
+    target: "claude-opus-4-5-thinking"
+  - pattern: "claude-opus-4-*"
+    target: "claude-opus-4-5-thinking"
