@@ -9,11 +9,12 @@ services:
       - "8045:8045"
     volumes:
       - ./data:/app/data
-      - ./config.yaml:/app/config.yaml:ro
+      - ./config.yaml:/app/config.yaml
     environment:
       - TZ=Asia/Shanghai
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      # OAuth 凭证可选，也可在 Web 界面配置
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
     healthcheck:
       test: [ "CMD", "wget", "-q", "--spider", "http://localhost:8045/health" ]
       interval: 30s

@@ -18,13 +18,15 @@ type Config struct {
 }
 
 type ServerConfig struct {
-	Port        int    `yaml:"port" json:"port"`
-	Host        string `yaml:"host" json:"host"`
-	LogLevel    string `yaml:"log_level" json:"log_level"`
-	APIKey      string `yaml:"api_key" json:"api_key"`
-	AuthEnabled bool   `yaml:"auth_enabled" json:"auth_enabled"`
-	LANAccess   bool   `yaml:"lan_access" json:"lan_access"`
-	AutoStart   bool   `yaml:"autostart" json:"autostart"`
+	Port               int    `yaml:"port" json:"port"`
+	Host               string `yaml:"host" json:"host"`
+	LogLevel           string `yaml:"log_level" json:"log_level"`
+	APIKey             string `yaml:"api_key" json:"api_key"`
+	AuthEnabled        bool   `yaml:"auth_enabled" json:"auth_enabled"`
+	LANAccess          bool   `yaml:"lan_access" json:"lan_access"`
+	AutoStart          bool   `yaml:"autostart" json:"autostart"`
+	GoogleClientID     string `yaml:"google_client_id" json:"google_client_id"`
+	GoogleClientSecret string `yaml:"google_client_secret" json:"google_client_secret"`
 }
 
 type ProxyConfig struct {
