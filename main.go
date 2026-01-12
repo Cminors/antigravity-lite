@@ -121,25 +121,25 @@ func main() {
 
 	// Serve embedded web UI
 	webContent, _ := fs.Sub(webFS, "web")
+	fileServer := http.FileServer(http.FS(webContent))
+
 	r.NoRoute(func(c *gin.Context) {
-		// Try to serve from embedded files
+		// Try to serve static files
 		path := c.Request.URL.Path
 		if path == "/" {
 			path = "/index.html"
 		}
 
+		// Check if file exists
 		file, err := webContent.Open(path[1:])
 		if err != nil {
 			// Serve index.html for SPA routing
-			file, _ = webContent.Open("index.html")
+			c.Request.URL.Path = "/index.html"
+		} else {
+			file.Close()
 		}
-		if file != nil {
-			defer file.Close()
-			stat, _ := file.Stat()
-			http.ServeContent(c.Writer, c.Request, stat.Name(), stat.ModTime(), file.(http.File))
-			return
-		}
-		c.String(404, "Not Found")
+
+		fileServer.ServeHTTP(c.Writer, c.Request)
 	})
 
 	// Start server
