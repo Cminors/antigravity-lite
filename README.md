@@ -72,10 +72,14 @@ cd antigravity-lite
 #### 步骤 2：启动服务
 
 ```bash
+# 新版 Docker（推荐）
+docker compose up -d
+
+# 或旧版 Docker
 docker-compose up -d
 
 # 查看日志（可选）
-docker-compose logs -f
+docker compose logs -f
 ```
 
 #### 步骤 3：打开 Web 管理界面
