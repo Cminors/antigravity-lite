@@ -80,6 +80,9 @@ func main() {
 	r.POST("/v1/chat/completions", proxyHandler.HandleChatCompletions)
 	r.GET("/v1/models", proxyHandler.HandleModels)
 
+	// API Proxy endpoints (Gemini compatible)
+	r.GET("/v1beta/models", proxyHandler.HandleModels)
+
 	// API Proxy endpoints (Anthropic compatible)
 	r.POST("/v1/messages", proxyHandler.HandleAnthropicMessages)
 
