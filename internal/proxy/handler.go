@@ -100,7 +100,7 @@ func (h *Handler) HandleChatCompletions(c *gin.Context) {
 		// Try with another account on error
 		if h.cfg.Proxy.AutoRotate && (statusCode == 429 || statusCode == 401 || statusCode == 403) {
 			h.accountMgr.MarkAccountError(acct.ID, statusCode)
-			
+
 			for i := 0; i < h.cfg.Proxy.MaxRetries; i++ {
 				acct, err = h.accountMgr.GetNextActive()
 				if err != nil {
@@ -264,13 +264,13 @@ func (h *Handler) convertToGeminiRequest(messages []map[string]interface{}, temp
 							if url, ok := imgURL["url"].(string); ok {
 								if strings.HasPrefix(url, "data:") {
 									// Base64 encoded image
-									parts := strings.SplitN(url, ",", 2)
-									if len(parts) == 2 {
-										mimeType := strings.TrimPrefix(strings.Split(parts[0], ";")[0], "data:")
+									urlParts := strings.SplitN(url, ",", 2)
+									if len(urlParts) == 2 {
+										mimeType := strings.TrimPrefix(strings.Split(urlParts[0], ";")[0], "data:")
 										parts = append(parts, map[string]interface{}{
 											"inline_data": map[string]interface{}{
 												"mime_type": mimeType,
-												"data":      parts[1],
+												"data":      urlParts[1],
 											},
 										})
 									}
