@@ -10,7 +10,6 @@
 
 <body>
     <div class="app">
-        <!-- Sidebar -->
         <nav class="sidebar">
             <div class="logo">
                 <span class="logo-icon">🚀</span>
@@ -19,41 +18,39 @@
             <ul class="nav-menu">
                 <li class="nav-item active" data-page="dashboard">
                     <span class="nav-icon">📊</span>
-                    <span>仪表�?/span>
+                    <span>Dashboard</span>
                 </li>
                 <li class="nav-item" data-page="accounts">
                     <span class="nav-icon">🔐</span>
-                    <span>账号管理</span>
+                    <span>Accounts</span>
                 </li>
                 <li class="nav-item" data-page="routes">
                     <span class="nav-icon">🔀</span>
-                    <span>模型路由</span>
+                    <span>Routes</span>
                 </li>
                 <li class="nav-item" data-page="logs">
                     <span class="nav-icon">📝</span>
-                    <span>请求日志</span>
+                    <span>Logs</span>
                 </li>
                 <li class="nav-item" data-page="settings">
                     <span class="nav-icon">⚙️</span>
-                    <span>设置</span>
+                    <span>Settings</span>
                 </li>
             </ul>
             <div class="sidebar-footer">
                 <div class="status-indicator">
                     <span class="status-dot"></span>
-                    <span class="status-text">运行�?/span>
+                    <span class="status-text">Running</span>
                 </div>
             </div>
         </nav>
 
-        <!-- Main Content -->
         <main class="main-content">
-            <!-- Dashboard Page -->
             <div id="page-dashboard" class="page active">
                 <div class="page-header">
-                    <h1>仪表�?/h1>
+                    <h1>Dashboard</h1>
                     <button class="btn btn-primary" onclick="refreshDashboard()">
-                        <span>🔄</span> 刷新
+                        <span>🔄</span> Refresh
                     </button>
                 </div>
 
@@ -62,39 +59,39 @@
                         <div class="stat-icon">🔐</div>
                         <div class="stat-info">
                             <span class="stat-value" id="stat-accounts">-</span>
-                            <span class="stat-label">账号总数</span>
+                            <span class="stat-label">Total Accounts</span>
                         </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">�?/div>
+                        <div class="stat-icon">✅</div>
                         <div class="stat-info">
                             <span class="stat-value" id="stat-active">-</span>
-                            <span class="stat-label">活跃账号</span>
+                            <span class="stat-label">Active Accounts</span>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon">📤</div>
                         <div class="stat-info">
                             <span class="stat-value" id="stat-requests">-</span>
-                            <span class="stat-label">今日请求</span>
+                            <span class="stat-label">Today Requests</span>
                         </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">�?/div>
+                        <div class="stat-icon">⚡</div>
                         <div class="stat-info">
                             <span class="stat-value" id="stat-latency">-</span>
-                            <span class="stat-label">平均延迟</span>
+                            <span class="stat-label">Avg Latency</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="dashboard-grid">
                     <div class="card">
-                        <h3>模型使用统计</h3>
+                        <h3>Model Stats</h3>
                         <div id="model-stats" class="stats-list"></div>
                     </div>
                     <div class="card">
-                        <h3>API 端点</h3>
+                        <h3>API Endpoints</h3>
                         <div class="endpoint-list">
                             <div class="endpoint-item">
                                 <span class="endpoint-method">POST</span>
@@ -109,29 +106,28 @@
                             <div class="endpoint-item">
                                 <span class="endpoint-method">GET</span>
                                 <code>/v1/models</code>
-                                <span class="endpoint-label">模型列表</span>
+                                <span class="endpoint-label">Models</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Accounts Page -->
             <div id="page-accounts" class="page">
                 <div class="page-header">
-                    <h1>账号管理</h1>
+                    <h1>Accounts</h1>
                     <div class="header-actions">
                         <button class="btn btn-secondary" onclick="checkAllAccounts()">
-                            <span>🔍</span> 检测全�?
+                            <span>🔍</span> Check All
                         </button>
                         <button class="btn btn-secondary" onclick="showImportModal()">
-                            <span>📥</span> 导入
+                            <span>📥</span> Import
                         </button>
                         <button class="btn btn-secondary" onclick="exportAccounts()">
-                            <span>📤</span> 导出
+                            <span>📤</span> Export
                         </button>
                         <button class="btn btn-primary" onclick="showAddAccountModal()">
-                            <span>�?/span> 添加账号
+                            <span>➕</span> Add Account
                         </button>
                     </div>
                 </div>
@@ -140,42 +136,41 @@
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th>名称</th>
-                                <th>邮箱</th>
-                                <th>类型</th>
-                                <th>状�?/th>
-                                <th>最后使�?/th>
-                                <th>操作</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Last Used</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="accounts-table">
                             <tr>
-                                <td colspan="6" class="loading">加载�?..</td>
+                                <td colspan="6" class="loading">Loading...</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Routes Page -->
             <div id="page-routes" class="page">
                 <div class="page-header">
-                    <h1>模型路由</h1>
+                    <h1>Model Routes</h1>
                     <button class="btn btn-primary" onclick="saveRoutes()">
-                        <span>💾</span> 保存
+                        <span>💾</span> Save
                     </button>
                 </div>
 
                 <div class="card">
-                    <p class="card-description">配置模型别名映射，将请求的模型名称映射到实际�?Gemini 模型�?/p>
+                    <p class="card-description">Configure model alias mappings.</p>
                     <div id="routes-container"></div>
                     <button class="btn btn-secondary" onclick="addRouteRow()" style="margin-top: 1rem;">
-                        <span>�?/span> 添加映射
+                        <span>➕</span> Add Mapping
                     </button>
                 </div>
 
                 <div class="card">
-                    <h3>预设模型</h3>
+                    <h3>Available Models</h3>
                     <div class="preset-models">
                         <span class="model-tag">gemini-2.0-flash</span>
                         <span class="model-tag">gemini-2.0-pro</span>
@@ -185,12 +180,11 @@
                 </div>
             </div>
 
-            <!-- Logs Page -->
             <div id="page-logs" class="page">
                 <div class="page-header">
-                    <h1>请求日志</h1>
+                    <h1>Request Logs</h1>
                     <button class="btn btn-primary" onclick="refreshLogs()">
-                        <span>🔄</span> 刷新
+                        <span>🔄</span> Refresh
                     </button>
                 </div>
 
@@ -198,52 +192,51 @@
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th>时间</th>
-                                <th>账号</th>
-                                <th>模型</th>
-                                <th>Token (�?�?</th>
-                                <th>延迟</th>
-                                <th>状�?/th>
+                                <th>Time</th>
+                                <th>Account</th>
+                                <th>Model</th>
+                                <th>Tokens (In/Out)</th>
+                                <th>Latency</th>
+                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody id="logs-table">
                             <tr>
-                                <td colspan="6" class="loading">加载�?..</td>
+                                <td colspan="6" class="loading">Loading...</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Settings Page -->
             <div id="page-settings" class="page">
                 <div class="page-header">
-                    <h1>设置</h1>
+                    <h1>Settings</h1>
                 </div>
 
                 <div class="card">
-                    <h3>代理设置</h3>
+                    <h3>Proxy Settings</h3>
                     <div class="form-group">
-                        <label>请求超时 (�?</label>
+                        <label>Request Timeout (seconds)</label>
                         <input type="number" id="config-timeout" value="120" min="10" max="600">
                     </div>
                     <div class="form-group">
-                        <label>最大重试次�?/label>
+                        <label>Max Retries</label>
                         <input type="number" id="config-retries" value="3" min="0" max="10">
                     </div>
                     <div class="form-group">
                         <label class="checkbox-label">
                             <input type="checkbox" id="config-autorotate" checked>
-                            <span>自动轮换账号 (429/401 �?</span>
+                            <span>Auto-rotate accounts on 429/401</span>
                         </label>
                     </div>
                     <button class="btn btn-primary" onclick="saveConfig()">
-                        <span>💾</span> 保存设置
+                        <span>💾</span> Save Settings
                     </button>
                 </div>
 
                 <div class="card">
-                    <h3>使用示例</h3>
+                    <h3>Usage Examples</h3>
                     <div class="code-block">
                         <p><strong>Python (OpenAI SDK):</strong></p>
                         <pre><code>from openai import OpenAI
@@ -259,8 +252,6 @@ response = client.chat.completions.create(
 )
 
 print(response.choices[0].message.content)</code></pre>
-                        <p style="color:var(--text-secondary);font-size:0.85rem;margin-top:0.5rem;">📝 API Key 需要在
-                            config.yaml 中配�?/p>
                     </div>
                     <div class="code-block">
                         <p><strong>Claude CLI:</strong></p>
@@ -273,28 +264,27 @@ claude</code></pre>
         </main>
     </div>
 
-    <!-- Add Account Modal -->
     <div id="modal-add-account" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>添加账号</h2>
+                <h2>Add Account</h2>
                 <button class="modal-close" onclick="closeModal('modal-add-account')">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label>名称 *</label>
-                    <input type="text" id="account-name" placeholder="例如: My Account 1">
+                    <label>Name *</label>
+                    <input type="text" id="account-name" placeholder="My Account 1">
                 </div>
                 <div class="form-group">
-                    <label>邮箱</label>
+                    <label>Email</label>
                     <input type="email" id="account-email" placeholder="example@gmail.com">
                 </div>
                 <div class="form-group">
                     <label>Refresh Token *</label>
-                    <textarea id="account-token" rows="4" placeholder="粘贴从其他设备获取的 Refresh Token"></textarea>
+                    <textarea id="account-token" rows="4" placeholder="Paste your Refresh Token here"></textarea>
                 </div>
                 <div class="form-group">
-                    <label>账号类型</label>
+                    <label>Account Type</label>
                     <select id="account-type">
                         <option value="free">Free</option>
                         <option value="pro">Pro</option>
@@ -303,34 +293,32 @@ claude</code></pre>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal('modal-add-account')">取消</button>
-                <button class="btn btn-primary" onclick="addAccount()">添加</button>
+                <button class="btn btn-secondary" onclick="closeModal('modal-add-account')">Cancel</button>
+                <button class="btn btn-primary" onclick="addAccount()">Add</button>
             </div>
         </div>
     </div>
 
-    <!-- Import Modal -->
     <div id="modal-import" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>导入账号</h2>
+                <h2>Import Accounts</h2>
                 <button class="modal-close" onclick="closeModal('modal-import')">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label>JSON 数据</label>
+                    <label>JSON Data</label>
                     <textarea id="import-data" rows="10"
                         placeholder='[{"name": "Account 1", "refresh_token": "1//xxx..."}]'></textarea>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal('modal-import')">取消</button>
-                <button class="btn btn-primary" onclick="importAccounts()">导入</button>
+                <button class="btn btn-secondary" onclick="closeModal('modal-import')">Cancel</button>
+                <button class="btn btn-primary" onclick="importAccounts()">Import</button>
             </div>
         </div>
     </div>
 
-    <!-- Toast -->
     <div id="toast" class="toast"></div>
 
     <script src="app.js"></script>
