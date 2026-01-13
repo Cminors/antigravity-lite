@@ -1,40 +1,60 @@
-# 构建阶段
+# ===========================================
+# Antigravity Lite - Optimized Dockerfile
+# Multi-stage build for minimal image size
+# ===========================================
+
+# Stage 1: Build
 FROM golang:1.21-alpine AS builder
 
 WORKDIR /app
 
-# 安装依赖
-RUN apk add --no-cache gcc musl-dev
+# Install build dependencies
+RUN apk add --no-cache gcc musl-dev git
 
-# 复制源码
-COPY go.mod ./
+# Copy dependency files first (better layer caching)
+COPY go.mod go.sum ./
 RUN go mod download
 
+# Copy source code
 COPY . .
 
-# 编译
-RUN CGO_ENABLED=1 GOOS=linux go build -a -ldflags '-linkmode external -extldflags "-static"' -o antigravity-lite .
+# Build with optimizations
+RUN CGO_ENABLED=1 GOOS=linux go build \
+    -a -ldflags '-s -w -linkmode external -extldflags "-static"' \
+    -o antigravity-lite .
 
-# 运行阶段
-FROM alpine:latest
+# Stage 2: Runtime
+FROM alpine:3.19
 
 WORKDIR /app
 
-# 安装证书（用于HTTPS请求）
-RUN apk --no-cache add ca-certificates tzdata
+# Install minimal runtime dependencies
+RUN apk --no-cache add ca-certificates tzdata wget && \
+    rm -rf /var/cache/apk/*
 
-# 复制二进制文件
-COPY --from=builder /app/antigravity-lite .
-COPY --from=builder /app/config.yaml .
+# Create non-root user for security
+RUN addgroup -g 1000 antigravity && \
+    adduser -u 1000 -G antigravity -s /bin/sh -D antigravity
 
-# 创建数据目录
-RUN mkdir -p /app/data
+# Copy binary and default config
+COPY --from=builder --chown=antigravity:antigravity /app/antigravity-lite .
+COPY --from=builder --chown=antigravity:antigravity /app/config.yaml ./config.yaml.default
 
-# 暴露端口
+# Create data directory with correct permissions
+RUN mkdir -p /app/data && chown -R antigravity:antigravity /app
+
+# Switch to non-root user
+USER antigravity
+
+# Expose port
 EXPOSE 8045
 
-# 设置时区
+# Set timezone
 ENV TZ=Asia/Shanghai
 
-# 运行
-CMD ["./antigravity-lite"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD wget -q --spider http://localhost:8045/health || exit 1
+
+# Entrypoint with config fallback
+CMD ["sh", "-c", "if [ ! -f /app/config.yaml ]; then cp /app/config.yaml.default /app/config.yaml; fi && ./antigravity-lite"]

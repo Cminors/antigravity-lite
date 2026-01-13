@@ -224,7 +224,18 @@ func (s *Storage) UpdateQuota(id int64, used, limit int64, resetAt time.Time) er
 	return err
 }
 
+// UpdateAccountType updates account subscription type
+func (s *Storage) UpdateAccountType(id int64, accountType string) error {
+	_, err := s.db.Exec(`
+		UPDATE accounts SET account_type = ?, updated_at = ? WHERE id = ?
+	`, accountType, time.Now(), id)
+	return err
+}
+
 // GetActiveAccounts returns accounts with active status
+// Sorted by: 1. Account type (ultra > pro > free)
+//  2. Remaining quota (higher first)
+//  3. Least recently used
 func (s *Storage) GetActiveAccounts() ([]Account, error) {
 	rows, err := s.db.Query(`
 		SELECT id, name, email, refresh_token, access_token, token_expiry,
@@ -232,7 +243,15 @@ func (s *Storage) GetActiveAccounts() ([]Account, error) {
 		       quota_used, quota_limit, quota_reset_at
 		FROM accounts 
 		WHERE status = ?
-		ORDER BY quota_used ASC, last_used_at ASC
+		ORDER BY 
+			CASE account_type 
+				WHEN 'ultra' THEN 1 
+				WHEN 'pro' THEN 2 
+				WHEN 'free' THEN 3 
+				ELSE 4 
+			END ASC,
+			(quota_limit - quota_used) DESC,
+			last_used_at ASC NULLS FIRST
 	`, StatusActive)
 	if err != nil {
 		return nil, err

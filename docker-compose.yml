@@ -2,21 +2,45 @@ version: '3.8'
 
 services:
   antigravity-lite:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: antigravity-lite:latest
     container_name: antigravity-lite
     restart: unless-stopped
     ports:
       - "8045:8045"
     volumes:
-      - ./data:/app/data
-      - ./config.yaml:/app/config.yaml
+      # Persist data and config
+      - antigravity_data:/app/data
+      - ./config.yaml:/app/config.yaml:ro
     environment:
       - TZ=Asia/Shanghai
-      # OAuth 凭证可选，也可在 Web 界面配置
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
+      # OAuth credentials (optional - can use web UI to add accounts)
+      # - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      # - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
     healthcheck:
       test: [ "CMD", "wget", "-q", "--spider", "http://localhost:8045/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 10s
+    # Resource limits for stability
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '1.0'
+        reservations:
+          memory: 64M
+          cpus: '0.25'
+    # Logging configuration
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  antigravity_data:
+    driver: local

@@ -1,28 +1,48 @@
 package account
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
+	"net/url"
 	"os"
+	"strings"
 	"sync"
 	"time"
 )
 
 // Manager handles account operations
 type Manager struct {
-	storage      *Storage
-	currentIndex int
-	mu           sync.RWMutex
+	storage        *Storage
+	currentIndex   int
+	mu             sync.RWMutex
+	rateLimiter    *RateLimitTracker
+	sessionManager *SessionManager
 }
 
 // NewManager creates a new account manager
 func NewManager(storage *Storage) *Manager {
-	return &Manager{
-		storage:      storage,
-		currentIndex: 0,
+	m := &Manager{
+		storage:        storage,
+		currentIndex:   0,
+		rateLimiter:    NewRateLimitTracker(),
+		sessionManager: NewSessionManager(60 * time.Minute), // 60 min session TTL
+	}
+
+	// Start cleanup goroutine
+	go m.periodicCleanup()
+
+	return m
+}
+
+// periodicCleanup cleans up expired rate limits and sessions
+func (m *Manager) periodicCleanup() {
+	ticker := time.NewTicker(5 * time.Minute)
+	for range ticker.C {
+		m.rateLimiter.ClearExpired()
+		m.sessionManager.CleanupExpired()
 	}
 }
 
@@ -54,8 +74,16 @@ func (m *Manager) Delete(id int64) error {
 	return m.storage.Delete(id)
 }
 
-// GetNextActive returns the next active account using round-robin
+// GetNextActive returns the next active account using intelligent selection
+// Priority: 1. Session-bound account (if valid)
+//  2. Non-rate-limited account with highest quota
+//  3. Any available account
 func (m *Manager) GetNextActive() (*Account, error) {
+	return m.GetNextActiveWithSession("")
+}
+
+// GetNextActiveWithSession returns the next active account with session stickiness
+func (m *Manager) GetNextActiveWithSession(sessionID string) (*Account, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -68,21 +96,58 @@ func (m *Manager) GetNextActive() (*Account, error) {
 		return nil, errors.New("no active accounts available")
 	}
 
-	// Round-robin selection
-	if m.currentIndex >= len(accounts) {
-		m.currentIndex = 0
+	// 1. Check session binding first (for stability)
+	if sessionID != "" {
+		if boundAccountID, ok := m.sessionManager.GetBoundAccount(sessionID); ok {
+			// Check if bound account is still active and not rate limited
+			for _, acc := range accounts {
+				if acc.ID == boundAccountID && !m.rateLimiter.IsRateLimited(acc.ID) {
+					// Reuse bound account
+					_ = m.storage.UpdateLastUsed(acc.ID)
+					return &acc, nil
+				}
+			}
+			// Bound account is no longer valid, unbind
+			m.sessionManager.UnbindSession(sessionID)
+		}
 	}
 
-	account := accounts[m.currentIndex]
-	m.currentIndex++
+	// 2. Find best non-rate-limited account (already sorted by tier/quota)
+	for _, acc := range accounts {
+		if !m.rateLimiter.IsRateLimited(acc.ID) {
+			// Bind to session if provided
+			if sessionID != "" {
+				m.sessionManager.BindSession(sessionID, acc.ID)
+			}
+			_ = m.storage.UpdateLastUsed(acc.ID)
+			return &acc, nil
+		}
+	}
 
-	// Update last used
-	_ = m.storage.UpdateLastUsed(account.ID)
+	// 3. All accounts rate limited - find the one with shortest wait
+	var bestAccount *Account
+	minWait := int(^uint(0) >> 1) // Max int
 
-	return &account, nil
+	for i := range accounts {
+		wait := m.rateLimiter.GetRemainingWait(accounts[i].ID)
+		if wait < minWait {
+			minWait = wait
+			bestAccount = &accounts[i]
+		}
+	}
+
+	if bestAccount != nil {
+		if sessionID != "" {
+			m.sessionManager.BindSession(sessionID, bestAccount.ID)
+		}
+		_ = m.storage.UpdateLastUsed(bestAccount.ID)
+		return bestAccount, nil
+	}
+
+	return nil, errors.New("no accounts available")
 }
 
-// GetBestAccount returns the account with most remaining quota
+// GetBestAccount returns the account with most remaining quota (not rate limited)
 func (m *Manager) GetBestAccount() (*Account, error) {
 	accounts, err := m.storage.GetActiveAccounts()
 	if err != nil {
@@ -93,7 +158,15 @@ func (m *Manager) GetBestAccount() (*Account, error) {
 		return nil, errors.New("no active accounts available")
 	}
 
-	// Already sorted by quota_used ASC
+	// Already sorted by tier and (quota_limit - quota_used) DESC
+	// Return first non-rate-limited account
+	for i := range accounts {
+		if !m.rateLimiter.IsRateLimited(accounts[i].ID) {
+			return &accounts[i], nil
+		}
+	}
+
+	// If all rate limited, return the first one anyway
 	return &accounts[0], nil
 }
 
@@ -130,42 +203,50 @@ func (m *Manager) CheckAccountStatus(id int64) (*Account, error) {
 
 // refreshAccessToken refreshes the access token using refresh token
 func (m *Manager) refreshAccessToken(refreshToken string) (string, time.Time, error) {
-	// Get OAuth credentials from environment variables
+	// Built-in OAuth credentials (same as Antigravity-Manager)
+	// These are Google's official Cloud Code OAuth credentials
+	const defaultClientID = "1071006060591-tmhssin2h21lcre235vtolojh4g403ep.apps.googleusercontent.com"
+	const defaultClientSecret = "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"
+
+	// Allow environment variable override if user wants custom credentials
 	clientID := os.Getenv("GOOGLE_CLIENT_ID")
 	clientSecret := os.Getenv("GOOGLE_CLIENT_SECRET")
-	
-	if clientID == "" || clientSecret == "" {
-		return "", time.Time{}, errors.New("GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables are required")
+
+	if clientID == "" {
+		clientID = defaultClientID
+	}
+	if clientSecret == "" {
+		clientSecret = defaultClientSecret
 	}
 
-	// Google OAuth token refresh
-	data := map[string]string{
-		"client_id":     clientID,
-		"client_secret": clientSecret,
-		"refresh_token": refreshToken,
-		"grant_type":    "refresh_token",
-	}
+	// Google OAuth token refresh using form-urlencoded (required format)
+	data := url.Values{}
+	data.Set("client_id", clientID)
+	data.Set("client_secret", clientSecret)
+	data.Set("refresh_token", refreshToken)
+	data.Set("grant_type", "refresh_token")
 
-	jsonData, _ := json.Marshal(data)
 	resp, err := http.Post(
 		"https://oauth2.googleapis.com/token",
-		"application/json",
-		bytes.NewBuffer(jsonData),
+		"application/x-www-form-urlencoded",
+		strings.NewReader(data.Encode()),
 	)
 	if err != nil {
 		return "", time.Time{}, err
 	}
 	defer resp.Body.Close()
 
+	body, _ := io.ReadAll(resp.Body)
+
 	if resp.StatusCode != 200 {
-		return "", time.Time{}, fmt.Errorf("token refresh failed: %d", resp.StatusCode)
+		return "", time.Time{}, fmt.Errorf("token refresh failed: %d - %s", resp.StatusCode, string(body))
 	}
 
 	var result struct {
 		AccessToken string `json:"access_token"`
 		ExpiresIn   int    `json:"expires_in"`
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+	if err := json.Unmarshal(body, &result); err != nil {
 		return "", time.Time{}, err
 	}
 
@@ -177,7 +258,7 @@ func (m *Manager) refreshAccessToken(refreshToken string) (string, time.Time, er
 func (m *Manager) testAPICall(accessToken string) Status {
 	client := &http.Client{Timeout: 10 * time.Second}
 
-	req, _ := http.NewRequest("GET", 
+	req, _ := http.NewRequest("GET",
 		"https://generativelanguage.googleapis.com/v1beta/models",
 		nil,
 	)
@@ -285,13 +366,32 @@ func (m *Manager) EnsureValidToken(account *Account) error {
 }
 
 // MarkAccountError marks an account as having an error
+// For 429 errors, it marks the account as rate limited temporarily
+// For 401/403 errors, it updates the account status
 func (m *Manager) MarkAccountError(id int64, statusCode int) {
+	account, err := m.storage.Get(id)
+	if err != nil {
+		return
+	}
+
 	switch statusCode {
+	case 429:
+		// Rate limited - mark for 60 seconds default
+		// In production, parse Retry-After header from response
+		m.rateLimiter.MarkRateLimited(id, account.Email, 60)
 	case 401:
 		_ = m.storage.UpdateStatus(id, StatusExpired)
 	case 403:
 		_ = m.storage.UpdateStatus(id, StatusBanned)
+	case 500, 503:
+		// Server error - brief rate limit to avoid hammering
+		m.rateLimiter.MarkRateLimited(id, account.Email, 10)
 	}
+}
+
+// MarkAccountSuccess clears rate limit for an account after successful request
+func (m *Manager) MarkAccountSuccess(id int64) {
+	m.rateLimiter.ClearRateLimit(id)
 }
 
 // GetStorage returns the underlying storage

@@ -16,19 +16,21 @@ import (
 
 // Handler handles management API requests
 type Handler struct {
-	accountMgr *account.Manager
-	router     *router.Router
-	tracker    *quota.Tracker
-	cfg        *config.Config
+	accountMgr   *account.Manager
+	router       *router.Router
+	tracker      *quota.Tracker
+	cfg          *config.Config
+	oauthHandler *account.OAuthHandler
 }
 
 // NewHandler creates a new API handler
 func NewHandler(accountMgr *account.Manager, rt *router.Router, tracker *quota.Tracker, cfg *config.Config) *Handler {
 	return &Handler{
-		accountMgr: accountMgr,
-		router:     rt,
-		tracker:    tracker,
-		cfg:        cfg,
+		accountMgr:   accountMgr,
+		router:       rt,
+		tracker:      tracker,
+		cfg:          cfg,
+		oauthHandler: account.NewOAuthHandler(accountMgr),
 	}
 }
 
@@ -141,6 +143,96 @@ func (h *Handler) CheckAllAccounts(c *gin.Context) {
 
 	accounts, _ := h.accountMgr.List()
 	c.JSON(200, accounts)
+}
+
+// RefreshQuota refreshes quota for a single account
+func (h *Handler) RefreshQuota(c *gin.Context) {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "invalid id"})
+		return
+	}
+
+	acc, err := h.accountMgr.Get(id)
+	if err != nil {
+		c.JSON(404, gin.H{"error": "account not found"})
+		return
+	}
+
+	// Ensure valid token
+	if err := h.accountMgr.EnsureValidToken(acc); err != nil {
+		c.JSON(500, gin.H{"error": "token refresh failed: " + err.Error()})
+		return
+	}
+
+	// Fetch quota
+	fetcher := quota.NewQuotaFetcher()
+	quotaData, err := fetcher.FetchQuota(acc.AccessToken, "", acc.Email)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "quota fetch failed: " + err.Error()})
+		return
+	}
+
+	// Update account in database with subscription tier
+	if quotaData.SubscriptionTier != "" {
+		// Map tier to account type
+		accountType := "free"
+		switch quotaData.SubscriptionTier {
+		case "ULTRA":
+			accountType = "ultra"
+		case "PRO":
+			accountType = "pro"
+		}
+		if accountType != acc.AccountType {
+			// Update account type if changed
+			_ = h.accountMgr.GetStorage().UpdateAccountType(acc.ID, accountType)
+		}
+	}
+
+	c.JSON(200, quotaData)
+}
+
+// RefreshAllQuotas refreshes quota for all active accounts
+func (h *Handler) RefreshAllQuotas(c *gin.Context) {
+	accounts, err := h.accountMgr.List()
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	fetcher := quota.NewQuotaFetcher()
+	results := make([]interface{}, 0)
+
+	for _, acc := range accounts {
+		if acc.Status != account.StatusActive {
+			continue
+		}
+
+		// Ensure valid token
+		if err := h.accountMgr.EnsureValidToken(&acc); err != nil {
+			results = append(results, gin.H{
+				"email": acc.Email,
+				"error": "token refresh failed",
+			})
+			continue
+		}
+
+		quotaData, err := fetcher.FetchQuota(acc.AccessToken, "", acc.Email)
+		if err != nil {
+			results = append(results, gin.H{
+				"email": acc.Email,
+				"error": err.Error(),
+			})
+			continue
+		}
+
+		results = append(results, quotaData)
+	}
+
+	c.JSON(200, gin.H{
+		"refreshed": len(results),
+		"results":   results,
+	})
 }
 
 // ImportAccounts imports accounts from JSON
@@ -337,4 +429,55 @@ func parseJSON(r *http.Request, v interface{}) error {
 		return err
 	}
 	return json.Unmarshal(body, v)
+}
+
+// StartOAuth starts the OAuth authorization flow
+func (h *Handler) StartOAuth(c *gin.Context) {
+	// Get the host from request for callback URL
+	host := c.Request.Host
+	scheme := "http"
+	if c.Request.TLS != nil {
+		scheme = "https"
+	}
+
+	// Use a fixed port for OAuth callback (different from main server)
+	callbackPort := 8046
+	callbackURL, err := h.oauthHandler.StartCallbackServer(callbackPort)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	authURL := h.oauthHandler.GetAuthURL(callbackURL)
+
+	c.JSON(200, gin.H{
+		"auth_url":     authURL,
+		"callback_url": callbackURL,
+		"message":      "Open the auth_url in your browser to authorize",
+		"note":         "Copy the URL and open it in any browser. After authorization, return to " + scheme + "://" + host + " to manage your account.",
+	})
+}
+
+// OAuthCallback handles the OAuth callback (this is served on the callback server, not main API)
+func (h *Handler) OAuthCallback(c *gin.Context) {
+	code := c.Query("code")
+	if code == "" {
+		c.JSON(400, gin.H{"error": "Missing authorization code"})
+		return
+	}
+
+	host := c.Request.Host
+	redirectURI := "http://" + host + "/api/oauth/callback"
+
+	account, err := h.oauthHandler.ProcessCallback(code, redirectURI)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"success": true,
+		"account": account,
+		"message": "Account added successfully",
+	})
 }

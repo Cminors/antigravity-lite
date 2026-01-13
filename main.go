@@ -105,6 +105,8 @@ func main() {
 		apiGroup.POST("/accounts/check-all", apiHandler.CheckAllAccounts)
 		apiGroup.POST("/accounts/import", apiHandler.ImportAccounts)
 		apiGroup.GET("/accounts/export", apiHandler.ExportAccounts)
+		apiGroup.POST("/accounts/:id/quota", apiHandler.RefreshQuota)
+		apiGroup.POST("/accounts/refresh-quotas", apiHandler.RefreshAllQuotas)
 
 		// Routes
 		apiGroup.GET("/routes", apiHandler.GetRoutes)
@@ -120,6 +122,10 @@ func main() {
 		// Config
 		apiGroup.GET("/config", apiHandler.GetConfig)
 		apiGroup.PUT("/config", apiHandler.UpdateConfig)
+
+		// OAuth
+		apiGroup.GET("/oauth/start", apiHandler.StartOAuth)
+		apiGroup.GET("/oauth/callback", apiHandler.OAuthCallback)
 	}
 
 	// Serve embedded web UI

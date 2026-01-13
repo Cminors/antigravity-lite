@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Antigravity Lite</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -112,6 +113,22 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Charts Section -->
+                <div class="charts-grid">
+                    <div class="card chart-card">
+                        <h3>📈 24小时请求趋势</h3>
+                        <div class="chart-container">
+                            <canvas id="hourlyChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="card chart-card">
+                        <h3>🥧 模型使用分布</h3>
+                        <div class="chart-container">
+                            <canvas id="modelChart"></canvas>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Accounts -->
@@ -127,6 +144,9 @@
                         </button>
                         <button class="btn btn-primary" onclick="showAddAccountModal()">
                             <span>➕</span> 添加账号
+                        </button>
+                        <button class="btn btn-secondary" onclick="refreshAllQuotas()">
+                            <span>🔄</span> 刷新配额
                         </button>
                     </div>
                 </div>

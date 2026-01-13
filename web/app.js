@@ -248,11 +248,70 @@ function getAccountBadges(acc, index) {
 }
 
 function getQuotaTags(acc) {
-    // Simulated quota display - in real app would come from API
-    return `
-        <span class="quota-tag">G3 Pro 100%</span>
-        <span class="quota-tag">G3 Flash 100%</span>
-    `;
+    // Display quota if available from account data
+    if (acc.quota_limit && acc.quota_limit > 0) {
+        const used = acc.quota_used || 0;
+        const limit = acc.quota_limit;
+        const remaining = Math.max(0, limit - used);
+        const percentage = Math.round((remaining / limit) * 100);
+
+        let colorClass = 'quota-high';
+        if (percentage < 30) colorClass = 'quota-low';
+        else if (percentage < 60) colorClass = 'quota-medium';
+
+        return `<span class="quota-tag ${colorClass}">${percentage}% 剩余</span>`;
+    }
+
+    // No quota data yet - show refresh button
+    return `<button class="btn btn-sm btn-secondary" onclick="refreshQuota(${acc.id})" title="刷新配额">🔄 获取配额</button>`;
+}
+
+// Refresh quota for single account
+async function refreshQuota(id) {
+    try {
+        showToast('正在查询配额...');
+        const res = await fetch(`${API_BASE}/api/accounts/${id}/quota`, { method: 'POST' });
+        const data = await res.json();
+
+        if (data.error) {
+            showToast('配额查询失败: ' + data.error, 'error');
+            return;
+        }
+
+        // Show quota info
+        if (data.models && data.models.length > 0) {
+            const quotaInfo = data.models.map(m => `${m.name}: ${m.percentage}%`).join(', ');
+            showToast(`配额信息: ${quotaInfo}`);
+        }
+
+        if (data.subscription_tier) {
+            showToast(`订阅类型: ${data.subscription_tier}`);
+        }
+
+        loadAccounts();
+    } catch (err) {
+        showToast('配额查询失败: ' + err.message, 'error');
+    }
+}
+
+// Refresh all quotas
+async function refreshAllQuotas() {
+    try {
+        showToast('正在查询所有账号配额...');
+        const res = await fetch(`${API_BASE}/api/accounts/refresh-quotas`, { method: 'POST' });
+        const data = await res.json();
+
+        if (data.error) {
+            showToast('配额查询失败: ' + data.error, 'error');
+            return;
+        }
+
+        showToast(`已刷新 ${data.refreshed} 个账号的配额`);
+        loadAccounts();
+        loadDashboard();
+    } catch (err) {
+        showToast('配额查询失败: ' + err.message, 'error');
+    }
 }
 
 async function addAccountFromModal() {
@@ -361,8 +420,45 @@ function testDbConnection() {
     showToast('数据库连接测试功能开发中', 'error');
 }
 
-function startOAuthFlow() {
-    showToast('OAuth 授权功能需要配置 GOOGLE_CLIENT_ID', 'error');
+async function startOAuthFlow() {
+    try {
+        showToast('正在启动 OAuth 授权...');
+        const res = await fetch(`${API_BASE}/api/oauth/start`);
+        const data = await res.json();
+
+        if (data.error) {
+            showToast(data.error, 'error');
+            return;
+        }
+
+        // Show auth URL and copy to clipboard
+        showToast('授权链接已生成，正在打开...');
+
+        // Copy to clipboard
+        navigator.clipboard.writeText(data.auth_url).then(() => {
+            showToast('授权链接已复制到剪贴板');
+        }).catch(() => { });
+
+        // Open in new window/tab
+        window.open(data.auth_url, '_blank');
+
+        closeModal('modal-add-account');
+
+        // Show instructions
+        setTimeout(() => {
+            showToast('请在浏览器中完成授权，授权后账号将自动添加');
+        }, 1000);
+
+        // Poll for new accounts
+        setTimeout(() => {
+            loadAccounts();
+            loadDashboard();
+        }, 5000);
+
+    } catch (err) {
+        console.error('OAuth flow error:', err);
+        showToast('启动 OAuth 授权失败: ' + err.message, 'error');
+    }
 }
 
 async function deleteAccount(id) {
@@ -685,4 +781,108 @@ function formatDateTime(dateStr) {
 // Initial load
 document.addEventListener('DOMContentLoaded', () => {
     loadDashboard();
+    initCharts();
 });
+
+// ========== Charts ==========
+let hourlyChart = null;
+let modelChart = null;
+
+function initCharts() {
+    // Initialize hourly requests chart
+    const hourlyCtx = document.getElementById('hourlyChart');
+    if (hourlyCtx) {
+        hourlyChart = new Chart(hourlyCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: '请求数',
+                    data: [],
+                    borderColor: '#58a6ff',
+                    backgroundColor: 'rgba(88, 166, 255, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(255,255,255,0.1)' },
+                        ticks: { color: '#8b949e' }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255,255,255,0.1)' },
+                        ticks: { color: '#8b949e' }
+                    }
+                }
+            }
+        });
+    }
+
+    // Initialize model distribution chart
+    const modelCtx = document.getElementById('modelChart');
+    if (modelCtx) {
+        modelChart = new Chart(modelCtx, {
+            type: 'doughnut',
+            data: {
+                labels: [],
+                datasets: [{
+                    data: [],
+                    backgroundColor: [
+                        '#58a6ff', '#a371f7', '#3fb950',
+                        '#d29922', '#f85149', '#8b949e'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { color: '#e6edf3' }
+                    }
+                }
+            }
+        });
+    }
+
+    // Load chart data
+    loadChartData();
+}
+
+async function loadChartData() {
+    try {
+        // Load hourly stats
+        const hourlyRes = await fetch(`${API_BASE}/api/stats/hourly`);
+        const hourlyData = await hourlyRes.json() || [];
+
+        if (hourlyChart && hourlyData.length > 0) {
+            hourlyChart.data.labels = hourlyData.map(d => {
+                const date = new Date(d.hour);
+                return date.getHours() + ':00';
+            });
+            hourlyChart.data.datasets[0].data = hourlyData.map(d => d.requests);
+            hourlyChart.update();
+        }
+
+        // Load model stats
+        const modelRes = await fetch(`${API_BASE}/api/stats/models`);
+        const modelData = await modelRes.json() || [];
+
+        if (modelChart && modelData.length > 0) {
+            modelChart.data.labels = modelData.slice(0, 6).map(d => d.model || 'unknown');
+            modelChart.data.datasets[0].data = modelData.slice(0, 6).map(d => d.requests);
+            modelChart.update();
+        }
+    } catch (err) {
+        console.error('Failed to load chart data:', err);
+    }
+}
