@@ -363,13 +363,63 @@ func (h *Handler) UpdateConfig(c *gin.Context) {
 		return
 	}
 
-	// Update relevant fields
-	h.cfg.Server.LogLevel = newCfg.Server.LogLevel
-	h.cfg.Proxy.Timeout = newCfg.Proxy.Timeout
-	h.cfg.Proxy.MaxRetries = newCfg.Proxy.MaxRetries
-	h.cfg.Proxy.AutoRotate = newCfg.Proxy.AutoRotate
+	// Update server config fields
+	if newCfg.Server.Port > 0 {
+		h.cfg.Server.Port = newCfg.Server.Port
+	}
+	if newCfg.Server.Host != "" {
+		h.cfg.Server.Host = newCfg.Server.Host
+	}
+	if newCfg.Server.LogLevel != "" {
+		h.cfg.Server.LogLevel = newCfg.Server.LogLevel
+	}
+	if newCfg.Server.APIKey != "" {
+		h.cfg.Server.APIKey = newCfg.Server.APIKey
+	}
+	h.cfg.Server.AuthEnabled = newCfg.Server.AuthEnabled
+	h.cfg.Server.LANAccess = newCfg.Server.LANAccess
+	h.cfg.Server.AutoStart = newCfg.Server.AutoStart
+	if newCfg.Server.GoogleClientID != "" {
+		h.cfg.Server.GoogleClientID = newCfg.Server.GoogleClientID
+	}
+	if newCfg.Server.GoogleClientSecret != "" {
+		h.cfg.Server.GoogleClientSecret = newCfg.Server.GoogleClientSecret
+	}
 
-	c.JSON(200, h.cfg)
+	// Update proxy config fields
+	if newCfg.Proxy.Timeout > 0 {
+		h.cfg.Proxy.Timeout = newCfg.Proxy.Timeout
+	}
+	if newCfg.Proxy.MaxRetries > 0 {
+		h.cfg.Proxy.MaxRetries = newCfg.Proxy.MaxRetries
+	}
+	h.cfg.Proxy.AutoRotate = newCfg.Proxy.AutoRotate
+	if newCfg.Proxy.ScheduleMode != "" {
+		h.cfg.Proxy.ScheduleMode = newCfg.Proxy.ScheduleMode
+	}
+	if newCfg.Proxy.MaxWaitTime >= 0 {
+		h.cfg.Proxy.MaxWaitTime = newCfg.Proxy.MaxWaitTime
+	}
+
+	// Update Host based on LANAccess
+	if h.cfg.Server.LANAccess {
+		h.cfg.Server.Host = "0.0.0.0"
+	} else {
+		h.cfg.Server.Host = "127.0.0.1"
+	}
+
+	// Save to config file
+	configPath := "./config.yaml"
+	if err := config.Save(configPath, h.cfg); err != nil {
+		c.JSON(500, gin.H{"error": "Failed to save config: " + err.Error()})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"success": true,
+		"message": "Configuration saved. Some changes require restart to take effect.",
+		"config":  h.cfg,
+	})
 }
 
 // Dashboard returns dashboard data

@@ -678,7 +678,8 @@ async function saveConfig() {
             port: parseInt(document.getElementById('config-port').value) || 8045,
             autostart: document.getElementById('config-autostart').checked,
             lan_access: document.getElementById('config-lan-access').checked,
-            auth_enabled: document.getElementById('config-auth-enabled').checked
+            auth_enabled: document.getElementById('config-auth-enabled').checked,
+            api_key: document.getElementById('api-key-value').textContent
         },
         proxy: {
             timeout: parseInt(document.getElementById('config-timeout').value) || 120,
@@ -689,14 +690,19 @@ async function saveConfig() {
     };
 
     try {
-        await fetch(`${API_BASE}/api/config`, {
+        const res = await fetch(`${API_BASE}/api/config`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(config)
         });
-        showToast('设置已保存');
+        const result = await res.json();
+        if (result.success) {
+            showToast('设置已保存！部分更改需要重启服务生效。');
+        } else {
+            showToast(result.error || '保存失败', 'error');
+        }
     } catch (err) {
-        showToast('保存失败', 'error');
+        showToast('保存失败: ' + err.message, 'error');
     }
 }
 
