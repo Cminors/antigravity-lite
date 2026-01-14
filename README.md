@@ -111,6 +111,7 @@ go mod tidy
 go build -o antigravity-lite .
 
 # 4. 运行
+chmod +x antigravity-lite
 ./antigravity-lite
 ```
 
