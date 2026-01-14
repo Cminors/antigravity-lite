@@ -55,7 +55,7 @@ func main() {
 	modelRouter := router.NewRouter(cfg)
 	quotaTracker := quota.NewTracker(storage.DB())
 	proxyHandler := proxy.NewHandler(accountMgr, modelRouter, cfg)
-	apiHandler := api.NewHandler(accountMgr, modelRouter, quotaTracker, cfg)
+	apiHandler := api.NewHandler(accountMgr, modelRouter, quotaTracker, cfg, configPath)
 
 	// Setup Gin
 	if cfg.Server.LogLevel != "debug" {

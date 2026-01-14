@@ -20,16 +20,18 @@ type Handler struct {
 	router       *router.Router
 	tracker      *quota.Tracker
 	cfg          *config.Config
+	configPath   string
 	oauthHandler *account.OAuthHandler
 }
 
 // NewHandler creates a new API handler
-func NewHandler(accountMgr *account.Manager, rt *router.Router, tracker *quota.Tracker, cfg *config.Config) *Handler {
+func NewHandler(accountMgr *account.Manager, rt *router.Router, tracker *quota.Tracker, cfg *config.Config, configPath string) *Handler {
 	return &Handler{
 		accountMgr:   accountMgr,
 		router:       rt,
 		tracker:      tracker,
 		cfg:          cfg,
+		configPath:   configPath,
 		oauthHandler: account.NewOAuthHandler(accountMgr),
 	}
 }
@@ -409,8 +411,7 @@ func (h *Handler) UpdateConfig(c *gin.Context) {
 	}
 
 	// Save to config file
-	configPath := "./config.yaml"
-	if err := config.Save(configPath, h.cfg); err != nil {
+	if err := config.Save(h.configPath, h.cfg); err != nil {
 		c.JSON(500, gin.H{"error": "Failed to save config: " + err.Error()})
 		return
 	}

@@ -30,31 +30,50 @@ mkdir -p data
 if [ ! -f config.yaml ]; then
     echo "📝 Creating default config..."
     cat > config.yaml << 'EOF'
-proxy:
+server:
   port: 8045
   host: "0.0.0.0"
-  enable_auth: false
-  api_keys: []
+  log_level: "info"
+  lan_access: true
 
-accounts:
-  db_path: "./data/accounts.db"
-  auto_refresh: true
-  refresh_interval: 30
+proxy:
+  timeout: 120
+  max_retries: 3
+  auto_rotate: true
+  stream_enabled: true
+  schedule_mode: "balance"
+  max_wait_time: 60
 
-routing:
-  default_model: "gemini-2.0-flash"
-  model_mapping: {}
+storage:
+  db_path: "./data/antigravity.db"
+
+routes:
+  - pattern: "gpt-4*"
+    target: "gemini-3-pro-high"
+  - pattern: "gpt-4o*"
+    target: "gemini-3-flash"
+  - pattern: "gpt-3.5*"
+    target: "gemini-2.5-flash"
+  - pattern: "claude-3-haiku-*"
+    target: "gemini-2.5-flash-lite"
+  - pattern: "claude-3-5-sonnet-*"
+    target: "claude-sonnet-4-5"
+  - pattern: "claude-3-opus-*"
+    target: "claude-opus-4-5-thinking"
 EOF
 fi
 
 echo ""
 echo "🔨 Building and starting..."
 
-# Use docker compose v2 if available
+# Use docker compose v2 if available, fallback to v1
 if docker compose version &> /dev/null; then
     docker compose up -d --build
-else
+elif command -v docker-compose &> /dev/null; then
     docker-compose up -d --build
+else
+    echo "❌ Neither 'docker compose' nor 'docker-compose' found. Please install Docker Compose."
+    exit 1
 fi
 
 echo ""
