@@ -13,7 +13,7 @@ services:
     volumes:
       # Persist data and config
       - antigravity_data:/app/data
-      - ./config.yaml:/app/config.yaml:ro
+      - ./config.yaml:/app/config.yaml
     environment:
       - TZ=Asia/Shanghai
       # OAuth credentials (optional - can use web UI to add accounts)
