@@ -317,16 +317,115 @@ func (h *Handler) convertToGeminiRequest(messages []map[string]interface{}, temp
 // HandleModels returns available models
 func (h *Handler) HandleModels(c *gin.Context) {
 	models := []map[string]interface{}{
+		// Gemini 3.x (Latest 2025)
+		{"id": "gemini-3-pro-high", "object": "model", "owned_by": "google"},
+		{"id": "gemini-3-pro", "object": "model", "owned_by": "google"},
+		{"id": "gemini-3-flash", "object": "model", "owned_by": "google"},
+
+		// Gemini 2.5.x
+		{"id": "gemini-2.5-pro", "object": "model", "owned_by": "google"},
+		{"id": "gemini-2.5-flash", "object": "model", "owned_by": "google"},
+		{"id": "gemini-2.5-flash-lite", "object": "model", "owned_by": "google"},
+
+		// Gemini 2.0.x
 		{"id": "gemini-2.0-flash", "object": "model", "owned_by": "google"},
+		{"id": "gemini-2.0-flash-lite", "object": "model", "owned_by": "google"},
 		{"id": "gemini-2.0-pro", "object": "model", "owned_by": "google"},
+
+		// Gemini 1.5.x (Legacy)
 		{"id": "gemini-1.5-flash", "object": "model", "owned_by": "google"},
 		{"id": "gemini-1.5-pro", "object": "model", "owned_by": "google"},
-		{"id": "gpt-4", "object": "model", "owned_by": "openai-alias"},
-		{"id": "gpt-4o", "object": "model", "owned_by": "openai-alias"},
-		{"id": "gpt-3.5-turbo", "object": "model", "owned_by": "openai-alias"},
+
+		// Claude 4.x (Latest 2025)
+		{"id": "claude-opus-4-5-thinking", "object": "model", "owned_by": "anthropic-alias"},
+		{"id": "claude-opus-4-5", "object": "model", "owned_by": "anthropic-alias"},
+		{"id": "claude-sonnet-4-5", "object": "model", "owned_by": "anthropic-alias"},
+		{"id": "claude-sonnet-4", "object": "model", "owned_by": "anthropic-alias"},
+
+		// Claude 3.x (Legacy aliases)
 		{"id": "claude-3-opus", "object": "model", "owned_by": "anthropic-alias"},
+		{"id": "claude-3-5-sonnet", "object": "model", "owned_by": "anthropic-alias"},
 		{"id": "claude-3-sonnet", "object": "model", "owned_by": "anthropic-alias"},
+		{"id": "claude-3-haiku", "object": "model", "owned_by": "anthropic-alias"},
+
+		// OpenAI Aliases (mapped to Gemini)
+		{"id": "gpt-4o", "object": "model", "owned_by": "openai-alias"},
+		{"id": "gpt-4o-mini", "object": "model", "owned_by": "openai-alias"},
+		{"id": "gpt-4-turbo", "object": "model", "owned_by": "openai-alias"},
+		{"id": "gpt-4", "object": "model", "owned_by": "openai-alias"},
+		{"id": "gpt-3.5-turbo", "object": "model", "owned_by": "openai-alias"},
+		{"id": "o1-preview", "object": "model", "owned_by": "openai-alias"},
+		{"id": "o1-mini", "object": "model", "owned_by": "openai-alias"},
+		{"id": "o3-mini", "object": "model", "owned_by": "openai-alias"},
 	}
 
 	c.JSON(200, gin.H{"object": "list", "data": models})
+}
+
+// HandleGeminiModels returns models in Gemini API native format
+func (h *Handler) HandleGeminiModels(c *gin.Context) {
+	geminiModels := []map[string]interface{}{
+		{
+			"name":                       "models/gemini-3-pro-high",
+			"displayName":                "Gemini 3 Pro High",
+			"description":                "Most capable Gemini 3 model for complex reasoning",
+			"supportedGenerationMethods": []string{"generateContent", "countTokens"},
+		},
+		{
+			"name":                       "models/gemini-3-pro",
+			"displayName":                "Gemini 3 Pro",
+			"description":                "Balanced Gemini 3 model for general tasks",
+			"supportedGenerationMethods": []string{"generateContent", "countTokens"},
+		},
+		{
+			"name":                       "models/gemini-3-flash",
+			"displayName":                "Gemini 3 Flash",
+			"description":                "Fast Gemini 3 model for quick responses",
+			"supportedGenerationMethods": []string{"generateContent", "countTokens"},
+		},
+		{
+			"name":                       "models/gemini-2.5-pro",
+			"displayName":                "Gemini 2.5 Pro",
+			"description":                "Advanced Gemini 2.5 model",
+			"supportedGenerationMethods": []string{"generateContent", "countTokens"},
+		},
+		{
+			"name":                       "models/gemini-2.5-flash",
+			"displayName":                "Gemini 2.5 Flash",
+			"description":                "Fast Gemini 2.5 model",
+			"supportedGenerationMethods": []string{"generateContent", "countTokens"},
+		},
+		{
+			"name":                       "models/gemini-2.5-flash-lite",
+			"displayName":                "Gemini 2.5 Flash Lite",
+			"description":                "Lightweight Gemini 2.5 model",
+			"supportedGenerationMethods": []string{"generateContent", "countTokens"},
+		},
+		{
+			"name":                       "models/gemini-2.0-flash",
+			"displayName":                "Gemini 2.0 Flash",
+			"description":                "Fast Gemini 2.0 model",
+			"supportedGenerationMethods": []string{"generateContent", "countTokens"},
+		},
+		{
+			"name":                       "models/gemini-2.0-pro",
+			"displayName":                "Gemini 2.0 Pro",
+			"description":                "Advanced Gemini 2.0 model",
+			"supportedGenerationMethods": []string{"generateContent", "countTokens"},
+		},
+		{
+			"name":                       "models/gemini-1.5-flash",
+			"displayName":                "Gemini 1.5 Flash",
+			"description":                "Legacy fast model",
+			"supportedGenerationMethods": []string{"generateContent", "countTokens"},
+		},
+		{
+			"name":                       "models/gemini-1.5-pro",
+			"displayName":                "Gemini 1.5 Pro",
+			"description":                "Legacy advanced model",
+			"supportedGenerationMethods": []string{"generateContent", "countTokens"},
+		},
+	}
+
+	c.JSON(200, gin.H{"models": geminiModels})
 }

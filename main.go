@@ -81,7 +81,7 @@ func main() {
 	r.GET("/v1/models", proxyHandler.HandleModels)
 
 	// API Proxy endpoints (Gemini compatible)
-	r.GET("/v1beta/models", proxyHandler.HandleModels)
+	r.GET("/v1beta/models", proxyHandler.HandleGeminiModels)
 
 	// API Proxy endpoints (Anthropic compatible)
 	r.POST("/v1/messages", proxyHandler.HandleAnthropicMessages)
