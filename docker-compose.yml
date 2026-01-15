@@ -11,9 +11,10 @@ services:
     ports:
       - "8045:8045"
     volumes:
-      # Persist data and config
+      # Persist data and config in the same volume for proper permissions
       - antigravity_data:/app/data
-      - ./config.yaml:/app/config.yaml
+      # Config file - mount as a directory to allow write access
+      - antigravity_config:/app/config
     environment:
       - TZ=Asia/Shanghai
       # OAuth credentials (optional - can use web UI to add accounts)
@@ -43,4 +44,6 @@ services:
 
 volumes:
   antigravity_data:
+    driver: local
+  antigravity_config:
     driver: local

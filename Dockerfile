@@ -40,8 +40,8 @@ RUN addgroup -g 1000 antigravity && \
 COPY --from=builder --chown=antigravity:antigravity /app/antigravity-lite .
 COPY --from=builder --chown=antigravity:antigravity /app/config.yaml ./config.yaml.default
 
-# Create data directory with correct permissions
-RUN mkdir -p /app/data && chown -R antigravity:antigravity /app
+# Create data and config directories with correct permissions
+RUN mkdir -p /app/data /app/config && chown -R antigravity:antigravity /app
 
 # Switch to non-root user
 USER antigravity
@@ -51,10 +51,11 @@ EXPOSE 8045
 
 # Set timezone
 ENV TZ=Asia/Shanghai
+ENV CONFIG_PATH=/app/config/config.yaml
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD wget -q --spider http://localhost:8045/health || exit 1
 
 # Entrypoint with config fallback
-CMD ["sh", "-c", "if [ ! -f /app/config.yaml ]; then cp /app/config.yaml.default /app/config.yaml; fi && ./antigravity-lite"]
+CMD ["sh", "-c", "if [ ! -f /app/config/config.yaml ]; then cp /app/config.yaml.default /app/config/config.yaml; fi && ./antigravity-lite"]

@@ -429,3 +429,68 @@ func (h *Handler) HandleGeminiModels(c *gin.Context) {
 
 	c.JSON(200, gin.H{"models": geminiModels})
 }
+
+// FetchLiveModels fetches actual available models from Google AI Studio API
+func (h *Handler) FetchLiveModels(c *gin.Context) {
+	// Get an active account to use for API call
+	acct, err := h.accountMgr.GetNextActive()
+	if err != nil {
+		// Return static list if no account available
+		h.HandleGeminiModels(c)
+		return
+	}
+
+	// Ensure valid token
+	if err := h.accountMgr.EnsureValidToken(acct); err != nil {
+		h.HandleGeminiModels(c)
+		return
+	}
+
+	// Call Google AI Studio models API
+	url := "https://generativelanguage.googleapis.com/v1beta/models"
+	httpReq, _ := http.NewRequest("GET", url, nil)
+	httpReq.Header.Set("Authorization", "Bearer "+acct.AccessToken)
+
+	resp, err := h.client.Do(httpReq)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "Failed to fetch models: " + err.Error()})
+		return
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+
+	if resp.StatusCode != 200 {
+		c.JSON(resp.StatusCode, gin.H{"error": "API error: " + string(body)})
+		return
+	}
+
+	// Parse and return the response
+	var modelsResp map[string]interface{}
+	if err := json.Unmarshal(body, &modelsResp); err != nil {
+		c.JSON(500, gin.H{"error": "Failed to parse response"})
+		return
+	}
+
+	// Filter to only include usable models
+	if models, ok := modelsResp["models"].([]interface{}); ok {
+		filteredModels := make([]interface{}, 0)
+		for _, m := range models {
+			if model, ok := m.(map[string]interface{}); ok {
+				// Check if model supports generateContent
+				if methods, ok := model["supportedGenerationMethods"].([]interface{}); ok {
+					for _, method := range methods {
+						if method == "generateContent" {
+							filteredModels = append(filteredModels, model)
+							break
+						}
+					}
+				}
+			}
+		}
+		modelsResp["models"] = filteredModels
+		modelsResp["account_used"] = acct.Email
+	}
+
+	c.JSON(200, modelsResp)
+}

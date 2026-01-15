@@ -82,6 +82,7 @@ func main() {
 
 	// API Proxy endpoints (Gemini compatible)
 	r.GET("/v1beta/models", proxyHandler.HandleGeminiModels)
+	r.GET("/v1beta/models/live", proxyHandler.FetchLiveModels) // Fetch live models from API
 
 	// API Proxy endpoints (Anthropic compatible)
 	r.POST("/v1/messages", proxyHandler.HandleAnthropicMessages)
