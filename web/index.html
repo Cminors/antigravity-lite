@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Antigravity Lite</title>
+    <title>Antigravity Lite - AI 代理服务</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -19,40 +19,40 @@
             <ul class="nav-menu">
                 <li class="nav-item active" data-page="dashboard">
                     <span class="nav-icon">📊</span>
-                    <span>Dashboard</span>
+                    <span>仪表盘</span>
                 </li>
                 <li class="nav-item" data-page="accounts">
                     <span class="nav-icon">🔐</span>
-                    <span>Accounts</span>
+                    <span>账号管理</span>
                 </li>
                 <li class="nav-item" data-page="routes">
                     <span class="nav-icon">🛤️</span>
-                    <span>Model Router</span>
+                    <span>模型路由</span>
                 </li>
                 <li class="nav-item" data-page="logs">
                     <span class="nav-icon">📝</span>
-                    <span>Logs</span>
+                    <span>请求日志</span>
                 </li>
                 <li class="nav-item" data-page="settings">
                     <span class="nav-icon">⚙️</span>
-                    <span>Settings</span>
+                    <span>系统设置</span>
                 </li>
             </ul>
             <div class="sidebar-footer">
                 <div class="status-indicator">
                     <span class="status-dot"></span>
-                    <span class="status-text">Running</span>
+                    <span class="status-text">运行中</span>
                 </div>
             </div>
         </nav>
 
         <main class="main-content">
-            <!-- Dashboard -->
+            <!-- 仪表盘 -->
             <div id="page-dashboard" class="page active">
                 <div class="page-header">
-                    <h1>Dashboard</h1>
-                    <button class="btn btn-primary" onclick="refreshDashboard()">
-                        <span>🔄</span> Refresh
+                    <h1>📊 仪表盘</h1>
+                    <button class="btn btn-primary btn-ripple" onclick="refreshDashboard()">
+                        <span>🔄</span> 刷新数据
                     </button>
                 </div>
 
@@ -61,60 +61,60 @@
                         <div class="stat-icon">🔐</div>
                         <div class="stat-info">
                             <span class="stat-value" id="stat-accounts">-</span>
-                            <span class="stat-label">Total Accounts</span>
+                            <span class="stat-label">账号总数</span>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon">✅</div>
                         <div class="stat-info">
                             <span class="stat-value" id="stat-active">-</span>
-                            <span class="stat-label">Active Accounts</span>
+                            <span class="stat-label">活跃账号</span>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon">📤</div>
                         <div class="stat-info">
                             <span class="stat-value" id="stat-requests">-</span>
-                            <span class="stat-label">Today Requests</span>
+                            <span class="stat-label">今日请求</span>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon">⚡</div>
                         <div class="stat-info">
                             <span class="stat-value" id="stat-latency">-</span>
-                            <span class="stat-label">Avg Latency</span>
+                            <span class="stat-label">平均延迟</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="dashboard-grid">
                     <div class="card">
-                        <h3>Model Stats</h3>
+                        <h3>🔥 模型统计</h3>
                         <div id="model-stats" class="stats-list"></div>
                     </div>
                     <div class="card">
-                        <h3>API Endpoints</h3>
+                        <h3>🔗 API 端点</h3>
                         <div class="endpoint-list">
                             <div class="endpoint-item">
                                 <span class="endpoint-method">POST</span>
                                 <code>/v1/chat/completions</code>
-                                <span class="endpoint-label">OpenAI</span>
+                                <span class="endpoint-label">OpenAI 兼容</span>
                             </div>
                             <div class="endpoint-item">
                                 <span class="endpoint-method">POST</span>
                                 <code>/v1/messages</code>
-                                <span class="endpoint-label">Anthropic</span>
+                                <span class="endpoint-label">Anthropic 兼容</span>
                             </div>
                             <div class="endpoint-item">
                                 <span class="endpoint-method">GET</span>
                                 <code>/v1/models</code>
-                                <span class="endpoint-label">Models</span>
+                                <span class="endpoint-label">模型列表</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Charts Section -->
+                <!-- 图表区域 -->
                 <div class="charts-grid">
                     <div class="card chart-card">
                         <h3>📈 24小时请求趋势</h3>
@@ -131,27 +131,27 @@
                 </div>
             </div>
 
-            <!-- Accounts -->
+            <!-- 账号管理 -->
             <div id="page-accounts" class="page">
                 <div class="page-header">
-                    <h1>Accounts</h1>
+                    <h1>🔐 账号管理</h1>
                     <div class="header-actions">
-                        <button class="btn btn-secondary" onclick="checkAllAccounts()">
-                            <span>🔍</span> Check All
+                        <button class="btn btn-secondary btn-ripple" onclick="checkAllAccounts()">
+                            <span>🔍</span> 检测全部
                         </button>
-                        <button class="btn btn-secondary" onclick="exportAccounts()">
-                            <span>📤</span> Export
+                        <button class="btn btn-secondary btn-ripple" onclick="exportAccounts()">
+                            <span>📤</span> 导出账号
                         </button>
-                        <button class="btn btn-primary" onclick="showAddAccountModal()">
+                        <button class="btn btn-primary btn-ripple" onclick="showAddAccountModal()">
                             <span>➕</span> 添加账号
                         </button>
-                        <button class="btn btn-secondary" onclick="refreshAllQuotas()">
+                        <button class="btn btn-secondary btn-ripple" onclick="refreshAllQuotas()">
                             <span>🔄</span> 刷新配额
                         </button>
                     </div>
                 </div>
 
-                <!-- Filter Bar -->
+                <!-- 筛选栏 -->
                 <div class="filter-bar">
                     <input type="text" id="account-search" placeholder="🔍 搜索邮箱..." onkeyup="filterAccounts()">
                     <div class="filter-tabs">
@@ -179,28 +179,28 @@
                         </thead>
                         <tbody id="accounts-table">
                             <tr>
-                                <td colspan="5" class="loading">Loading...</td>
+                                <td colspan="5" class="loading">加载中...</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Model Router -->
+            <!-- 模型路由 -->
             <div id="page-routes" class="page">
                 <div class="page-header">
                     <div class="page-title-section">
-                        <h1>🛤️ 模型路由中心 (Model Router)</h1>
+                        <h1>🛤️ 模型路由中心</h1>
                         <p class="page-subtitle">通过通配符或精确映射自定义模型路由规则</p>
                     </div>
                     <div class="header-actions">
-                        <button class="btn btn-secondary" onclick="applyPresetMappings()">
-                            <span>✨</span> 应用预设映射
+                        <button class="btn btn-secondary btn-ripple" onclick="applyPresetMappings()">
+                            <span>✨</span> 应用预设
                         </button>
-                        <button class="btn btn-secondary" onclick="resetMappings()">
+                        <button class="btn btn-secondary btn-ripple" onclick="resetMappings()">
                             <span>🔄</span> 重置映射
                         </button>
-                        <button class="btn btn-primary" onclick="saveRoutes()">
+                        <button class="btn btn-primary btn-ripple" onclick="saveRoutes()">
                             <span>💾</span> 保存
                         </button>
                     </div>
@@ -208,17 +208,17 @@
 
                 <div class="card">
                     <div class="section-header">
-                        <h3>▸ 自定义映射 (CUSTOM MAPPINGS)</h3>
+                        <h3>📝 自定义映射规则</h3>
                     </div>
-                    <p class="section-subtitle">当前映射列表 (CUSTOM LIST)</p>
+                    <p class="section-subtitle">源模型 → 目标模型（支持通配符 *）</p>
                     <div id="routes-container" class="mappings-grid"></div>
-                    <button class="btn btn-secondary" onclick="addRouteRow()" style="margin-top: 1rem;">
+                    <button class="btn btn-secondary btn-ripple" onclick="addRouteRow()" style="margin-top: 1rem;">
                         <span>➕</span> 添加映射
                     </button>
                 </div>
 
                 <div class="card" style="margin-top: 1rem;">
-                    <h3>可用模型</h3>
+                    <h3>🎯 可用目标模型</h3>
                     <div class="preset-models">
                         <span class="model-tag">gemini-2.5-flash</span>
                         <span class="model-tag">gemini-2.5-pro</span>
@@ -230,12 +230,12 @@
                 </div>
             </div>
 
-            <!-- Logs -->
+            <!-- 请求日志 -->
             <div id="page-logs" class="page">
                 <div class="page-header">
-                    <h1>Request Logs</h1>
-                    <button class="btn btn-primary" onclick="refreshLogs()">
-                        <span>🔄</span> Refresh
+                    <h1>📝 请求日志</h1>
+                    <button class="btn btn-primary btn-ripple" onclick="refreshLogs()">
+                        <span>🔄</span> 刷新
                     </button>
                 </div>
 
@@ -243,176 +243,217 @@
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th>Time</th>
-                                <th>Account</th>
-                                <th>Model</th>
-                                <th>Tokens (In/Out)</th>
-                                <th>Latency</th>
-                                <th>Status</th>
+                                <th>时间</th>
+                                <th>账号</th>
+                                <th>模型</th>
+                                <th>令牌数 (输入/输出)</th>
+                                <th>延迟</th>
+                                <th>状态</th>
                             </tr>
                         </thead>
                         <tbody id="logs-table">
                             <tr>
-                                <td colspan="6" class="loading">Loading...</td>
+                                <td colspan="6" class="loading">加载中...</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Settings -->
+            <!-- 系统设置 (重新设计) -->
             <div id="page-settings" class="page">
                 <div class="page-header">
                     <div class="page-title-section">
-                        <h1>⚙️ 服务配置</h1>
+                        <h1>⚙️ 系统设置</h1>
                         <span class="service-status" id="service-status">● 服务运行中 (0 个账号)</span>
                     </div>
                     <div class="header-actions">
-                        <button class="btn btn-secondary" onclick="openMonitor()">
-                            <span>📊</span> 打开监控
+                        <button class="btn btn-secondary btn-ripple" onclick="openMonitor()">
+                            <span>📊</span> 监控面板
                         </button>
-                        <button class="btn btn-danger" onclick="toggleService()" id="btn-toggle-service">
+                        <button class="btn btn-danger btn-ripple" onclick="toggleService()" id="btn-toggle-service">
                             <span>⏹</span> 停止服务
                         </button>
                     </div>
                 </div>
 
-                <!-- Service Config Card -->
-                <div class="card config-card">
-                    <div class="config-grid">
-                        <div class="config-item">
-                            <label>监听端口 <span class="info-icon" title="默认 8045，修改端口需重启服务">ⓘ</span></label>
-                            <input type="number" id="config-port" value="8045" min="1000" max="65535">
-                            <p class="config-hint">默认 8045，修改端口需重启服务</p>
-                        </div>
-                        <div class="config-item">
-                            <label>请求超时 <span class="info-icon" title="范围 30-3600 秒">ⓘ</span></label>
-                            <div class="input-with-suffix">
-                                <input type="number" id="config-timeout" value="120" min="30" max="3600">
-                                <span class="suffix">秒</span>
+                <!-- 服务配置卡片 -->
+                <div class="settings-section">
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <span class="settings-card-icon">🌐</span>
+                            <div class="settings-card-title">
+                                <h3>服务配置</h3>
+                                <p>配置服务端口、超时时间等基础设置</p>
                             </div>
-                            <p class="config-hint">默认 120 秒，范围 30-3600 秒，修改后需重启服务生效</p>
                         </div>
-                        <div class="config-item">
-                            <label class="toggle-label">
-                                <span>跟随应用自动启动 <span class="info-icon">ⓘ</span></span>
-                                <label class="toggle">
-                                    <input type="checkbox" id="config-autostart" checked>
-                                    <span class="toggle-slider"></span>
-                                </label>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="config-row">
-                        <div class="config-item">
-                            <label>允许局域网访问 <span class="info-icon">ⓘ</span></label>
-                            <label class="toggle">
-                                <input type="checkbox" id="config-lan-access">
-                                <span class="toggle-slider"></span>
-                            </label>
-                            <p class="config-hint">🔒 仅监听 127.0.0.1，仅本机可访问（隐私优先）</p>
-                            <p class="config-hint warning">⚠ 需要重启服务后生效</p>
-                        </div>
-                        <div class="config-item">
-                            <label>访问授权 <span class="info-icon">ⓘ</span></label>
-                            <div class="auth-config">
-                                <span>已启用</span>
-                                <label class="toggle">
-                                    <input type="checkbox" id="config-auth-enabled">
-                                    <span class="toggle-slider"></span>
-                                </label>
-                            </div>
-                            <div class="form-group">
-                                <label>模式</label>
-                                <select id="config-auth-mode">
-                                    <option value="open">关闭（开放）</option>
-                                    <option value="bearer">Bearer Token</option>
-                                </select>
-                            </div>
-                            <p class="config-hint">开启后客户端需通过 Authorization: Bearer ... 传入 API 密钥</p>
-                        </div>
-                    </div>
-
-                    <div class="api-key-section">
-                        <label>API 密钥 <span class="info-icon">ⓘ</span></label>
-                        <div class="api-key-display">
-                            <code id="api-key-value">sk-xxxxxxxxxxxxxxxxxxxxx</code>
-                            <button class="btn btn-sm btn-secondary" onclick="refreshApiKey()">
-                                <span>🔄</span>
-                            </button>
-                            <button class="btn btn-sm btn-secondary" onclick="copyApiKey()">
-                                <span>📋</span>
-                            </button>
-                        </div>
-                        <p class="config-hint warning">注意：请妥善保管您的 API 密钥，不要泄露给他人。</p>
-                    </div>
-                </div>
-
-                <!-- Scheduling Mode Card -->
-                <div class="card config-card" style="margin-top: 1rem;">
-                    <div class="scheduling-header">
-                        <h3>调度模式 <span class="info-icon">ⓘ</span></h3>
-                        <button class="btn btn-sm btn-secondary" onclick="clearSessionBinding()">
-                            <span>🗑️</span> 清除会话绑定
-                        </button>
-                    </div>
-
-                    <div class="scheduling-content">
-                        <div class="schedule-modes">
-                            <label class="mode-option">
-                                <input type="radio" name="schedule-mode" value="cache">
-                                <div class="mode-card">
-                                    <strong>缓存优先 (Cache First)</strong>
-                                    <p>绑定会话与账号，限流时继续等待（最大化 Prompt Cache 命中率）。</p>
+                        <div class="settings-card-body">
+                            <div class="settings-row">
+                                <div class="settings-field">
+                                    <label>监听端口</label>
+                                    <input type="number" id="config-port" value="8045" min="1000" max="65535"
+                                        class="input-field">
+                                    <span class="field-hint">默认 8045，修改后需重启</span>
                                 </div>
-                            </label>
-                            <label class="mode-option">
-                                <input type="radio" name="schedule-mode" value="balance" checked>
-                                <div class="mode-card active">
-                                    <strong>平衡轮换 (Balance)</strong>
-                                    <p>绑定会话，限流时自动热切换至可用账号（兼顾缓存与可用性）。</p>
+                                <div class="settings-field">
+                                    <label>请求超时</label>
+                                    <div class="input-group">
+                                        <input type="number" id="config-timeout" value="120" min="30" max="3600"
+                                            class="input-field">
+                                        <span class="input-suffix">秒</span>
+                                    </div>
+                                    <span class="field-hint">范围 30-3600 秒</span>
                                 </div>
-                            </label>
-                            <label class="mode-option">
-                                <input type="radio" name="schedule-mode" value="performance">
-                                <div class="mode-card">
-                                    <strong>性能优先 (Performance)</strong>
-                                    <p>无会话绑定，纯随机轮换（适合高并发，不考虑缓存）。</p>
+                                <div class="settings-field">
+                                    <label>跟随应用启动</label>
+                                    <label class="switch">
+                                        <input type="checkbox" id="config-autostart" checked>
+                                        <span class="switch-slider"></span>
+                                    </label>
                                 </div>
-                            </label>
-                        </div>
-
-                        <div class="wait-time-section">
-                            <label>最大等待时长 (秒) <span class="info-icon">ⓘ</span></label>
-                            <div class="slider-container">
-                                <input type="range" id="config-wait-time" min="0" max="300" value="60"
-                                    oninput="updateWaitTimeDisplay(this.value)">
-                                <span class="slider-value" id="wait-time-value">60s</span>
                             </div>
-                            <div class="slider-labels">
-                                <span>0s</span>
-                                <span>300s</span>
-                            </div>
-                            <p class="config-hint info">💡 提示：针对全协议客户端优化 Prompt Caching 和限流处理 (OpenAI/Gemini/Claude)。
-                            </p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Save Button -->
+                <!-- 访问控制卡片 -->
+                <div class="settings-section">
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <span class="settings-card-icon">🔒</span>
+                            <div class="settings-card-title">
+                                <h3>访问控制</h3>
+                                <p>配置网络访问权限和API密钥</p>
+                            </div>
+                        </div>
+                        <div class="settings-card-body">
+                            <div class="settings-row">
+                                <div class="settings-field">
+                                    <label>允许局域网访问</label>
+                                    <label class="switch">
+                                        <input type="checkbox" id="config-lan-access">
+                                        <span class="switch-slider"></span>
+                                    </label>
+                                    <span class="field-hint">开启后监听 0.0.0.0，需重启生效</span>
+                                </div>
+                                <div class="settings-field">
+                                    <label>启用访问授权</label>
+                                    <label class="switch">
+                                        <input type="checkbox" id="config-auth-enabled">
+                                        <span class="switch-slider"></span>
+                                    </label>
+                                    <span class="field-hint">需要 Bearer Token 才能访问</span>
+                                </div>
+                            </div>
+
+                            <div class="api-key-box">
+                                <label>🔑 API 密钥</label>
+                                <div class="api-key-container">
+                                    <code class="api-key-display" id="api-key-value">sk-xxxxxxxxxxxxxxxxxxxxx</code>
+                                    <div class="api-key-actions">
+                                        <button class="btn btn-icon btn-ripple" onclick="refreshApiKey()" title="生成新密钥">
+                                            🔄
+                                        </button>
+                                        <button class="btn btn-icon btn-ripple" onclick="copyApiKey()" title="复制密钥">
+                                            📋
+                                        </button>
+                                    </div>
+                                </div>
+                                <span class="field-hint warning">⚠️ 请妥善保管您的 API 密钥，不要泄露给他人</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 调度策略卡片 -->
+                <div class="settings-section">
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <span class="settings-card-icon">⚡</span>
+                            <div class="settings-card-title">
+                                <h3>调度策略</h3>
+                                <p>选择账号轮换和请求调度模式</p>
+                            </div>
+                            <button class="btn btn-sm btn-secondary btn-ripple" onclick="clearSessionBinding()">
+                                🗑️ 清除会话
+                            </button>
+                        </div>
+                        <div class="settings-card-body">
+                            <div class="schedule-modes">
+                                <label class="schedule-mode-option">
+                                    <input type="radio" name="schedule-mode" value="cache">
+                                    <div class="schedule-mode-card">
+                                        <div class="mode-icon">🎯</div>
+                                        <div class="mode-content">
+                                            <strong>缓存优先</strong>
+                                            <p>绑定会话与账号，限流时继续等待，最大化缓存命中率</p>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="schedule-mode-option">
+                                    <input type="radio" name="schedule-mode" value="balance" checked>
+                                    <div class="schedule-mode-card active">
+                                        <div class="mode-icon">⚖️</div>
+                                        <div class="mode-content">
+                                            <strong>平衡模式</strong>
+                                            <p>绑定会话，限流时热切换，兼顾缓存与可用性（推荐）</p>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="schedule-mode-option">
+                                    <input type="radio" name="schedule-mode" value="performance">
+                                    <div class="schedule-mode-card">
+                                        <div class="mode-icon">🚀</div>
+                                        <div class="mode-content">
+                                            <strong>性能优先</strong>
+                                            <p>无会话绑定，纯随机轮换，适合高并发场景</p>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div class="wait-time-config">
+                                <label>最大等待时长</label>
+                                <div class="slider-wrapper">
+                                    <input type="range" id="config-wait-time" min="0" max="300" value="60"
+                                        class="custom-slider" oninput="updateWaitTimeDisplay(this.value)">
+                                    <span class="slider-value" id="wait-time-value">60秒</span>
+                                </div>
+                                <div class="slider-range">
+                                    <span>0秒</span>
+                                    <span>300秒</span>
+                                </div>
+                                <span class="field-hint info">💡 仅在「缓存优先」模式下生效</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 保存按钮 -->
                 <div class="settings-footer">
-                    <button class="btn btn-primary btn-lg" onclick="saveConfig()">
-                        <span>💾</span> 保存设置
+                    <button class="btn btn-primary btn-lg btn-ripple btn-save" onclick="saveConfig()">
+                        <span>💾</span> 保存所有设置
                     </button>
                 </div>
 
-                <!-- Usage Examples -->
-                <div class="card" style="margin-top: 1rem;">
-                    <h3>使用示例</h3>
-                    <div class="code-block">
-                        <p><strong>Python (OpenAI SDK):</strong></p>
-                        <pre><code>from openai import OpenAI
+                <!-- 使用示例 -->
+                <div class="settings-section">
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <span class="settings-card-icon">📖</span>
+                            <div class="settings-card-title">
+                                <h3>使用示例</h3>
+                                <p>快速开始使用 Antigravity Lite</p>
+                            </div>
+                        </div>
+                        <div class="settings-card-body">
+                            <div class="code-example">
+                                <div class="code-header">
+                                    <span class="code-lang">Python (OpenAI SDK)</span>
+                                    <button class="btn btn-sm btn-icon btn-ripple"
+                                        onclick="copyCode('python-example')">📋</button>
+                                </div>
+                                <pre id="python-example"><code>from openai import OpenAI
 
 client = OpenAI(
     base_url="http://127.0.0.1:8045/v1",
@@ -421,78 +462,88 @@ client = OpenAI(
 
 response = client.chat.completions.create(
     model="claude-sonnet-4-5",
-    messages=[{"role": "user", "content": "Hello"}]
+    messages=[{"role": "user", "content": "你好"}]
 )
 
 print(response.choices[0].message.content)</code></pre>
-                    </div>
-                    <div class="code-block">
-                        <p><strong>Claude CLI:</strong></p>
-                        <pre><code>export ANTHROPIC_API_KEY="your-api-key"
+                            </div>
+                            <div class="code-example">
+                                <div class="code-header">
+                                    <span class="code-lang">Claude CLI</span>
+                                    <button class="btn btn-sm btn-icon btn-ripple"
+                                        onclick="copyCode('cli-example')">📋</button>
+                                </div>
+                                <pre id="cli-example"><code>export ANTHROPIC_API_KEY="your-api-key"
 export ANTHROPIC_BASE_URL="http://127.0.0.1:8045"
 claude</code></pre>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Add Account Modal (Multi-tab) -->
+    <!-- 添加账号弹窗 -->
     <div id="modal-add-account" class="modal">
         <div class="modal-content modal-lg">
             <div class="modal-header">
-                <h2>添加新账号</h2>
-                <button class="modal-close" onclick="closeModal('modal-add-account')">&times;</button>
+                <h2>➕ 添加新账号</h2>
+                <button class="modal-close btn-ripple" onclick="closeModal('modal-add-account')">&times;</button>
             </div>
             <div class="modal-tabs">
-                <button class="modal-tab" data-tab="oauth" onclick="switchAccountTab('oauth')">OAuth 授权</button>
-                <button class="modal-tab active" data-tab="token" onclick="switchAccountTab('token')">Refresh
-                    Token</button>
-                <button class="modal-tab" data-tab="database" onclick="switchAccountTab('database')">从数据库导入</button>
+                <button class="modal-tab btn-ripple" data-tab="oauth" onclick="switchAccountTab('oauth')">🔐 OAuth
+                    授权</button>
+                <button class="modal-tab active btn-ripple" data-tab="token" onclick="switchAccountTab('token')">📝
+                    Token 导入</button>
+                <button class="modal-tab btn-ripple" data-tab="database" onclick="switchAccountTab('database')">💾
+                    数据库导入</button>
             </div>
             <div class="modal-body">
-                <!-- OAuth Tab -->
+                <!-- OAuth 标签页 -->
                 <div class="tab-content" id="tab-oauth">
                     <div class="oauth-section">
-                        <p class="info-text">通过 Google OAuth 授权获取 Refresh Token</p>
-                        <button class="btn btn-primary btn-lg" onclick="startOAuthFlow()">
-                            <span>🔐</span> 开始 OAuth 授权
+                        <div class="oauth-info">
+                            <div class="oauth-icon">🔐</div>
+                            <h3>通过 Google OAuth 授权</h3>
+                            <p>安全快捷地添加您的 Google 账号，自动获取 Refresh Token</p>
+                        </div>
+                        <button class="btn btn-primary btn-lg btn-ripple" onclick="startOAuthFlow()">
+                            <span>🚀</span> 开始授权
                         </button>
-                        <p class="config-hint">需要配置 GOOGLE_CLIENT_ID 和 GOOGLE_CLIENT_SECRET 环境变量</p>
+                        <p class="oauth-hint">点击后将在新窗口打开 Google 授权页面</p>
                     </div>
                 </div>
 
-                <!-- Token Tab -->
+                <!-- Token 标签页 -->
                 <div class="tab-content active" id="tab-token">
                     <div class="form-group">
                         <label>Refresh Token</label>
-                        <textarea id="account-token" rows="6" placeholder="在此处粘贴您的 Refresh Token（支持批量）"></textarea>
+                        <textarea id="account-token" rows="6" placeholder="在此处粘贴您的 Refresh Token（支持批量导入）"></textarea>
                     </div>
                     <div class="token-formats">
-                        <p class="hint-title">支持格式：</p>
-                        <ol class="format-list">
+                        <p class="hint-title">📋 支持的格式：</p>
+                        <ul class="format-list">
                             <li>单个 Token (1//...)</li>
                             <li>JSON 数组（含 refresh_token 字段）</li>
                             <li>任意包含 Token 的文本（自动提取）</li>
-                        </ol>
+                        </ul>
                     </div>
-                    <p class="config-hint info">💡 提示：支持一次性粘贴多个 Token 或 JSON 数组，系统将自动识别并批量导入。</p>
-
                     <div class="form-group" style="margin-top: 1rem;">
                         <label>账号类型（可选）</label>
-                        <select id="account-type">
-                            <option value="free">Free</option>
-                            <option value="pro">Pro</option>
-                            <option value="ultra">Ultra</option>
+                        <select id="account-type" class="input-field">
+                            <option value="free">Free - 免费版</option>
+                            <option value="pro">Pro - 专业版</option>
+                            <option value="ultra">Ultra - 旗舰版</option>
                         </select>
                     </div>
                 </div>
 
-                <!-- Database Tab -->
+                <!-- 数据库标签页 -->
                 <div class="tab-content" id="tab-database">
                     <div class="form-group">
                         <label>数据库类型</label>
-                        <select id="db-type">
+                        <select id="db-type" class="input-field">
                             <option value="sqlite">SQLite</option>
                             <option value="mysql">MySQL</option>
                             <option value="postgres">PostgreSQL</option>
@@ -500,21 +551,21 @@ claude</code></pre>
                     </div>
                     <div class="form-group">
                         <label>连接字符串</label>
-                        <input type="text" id="db-connection"
+                        <input type="text" id="db-connection" class="input-field"
                             placeholder="例如: ./accounts.db 或 user:pass@tcp(host:3306)/dbname">
                     </div>
                     <div class="form-group">
                         <label>表名</label>
-                        <input type="text" id="db-table" placeholder="accounts" value="accounts">
+                        <input type="text" id="db-table" class="input-field" placeholder="accounts" value="accounts">
                     </div>
-                    <button class="btn btn-secondary" onclick="testDbConnection()">
+                    <button class="btn btn-secondary btn-ripple" onclick="testDbConnection()">
                         <span>🔌</span> 测试连接
                     </button>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal('modal-add-account')">取消</button>
-                <button class="btn btn-primary" onclick="addAccountFromModal()">确认添加</button>
+                <button class="btn btn-secondary btn-ripple" onclick="closeModal('modal-add-account')">取消</button>
+                <button class="btn btn-primary btn-ripple" onclick="addAccountFromModal()">确认添加</button>
             </div>
         </div>
     </div>

@@ -656,10 +656,11 @@ async function loadConfig() {
 }
 
 function updateModeCards() {
-    document.querySelectorAll('.mode-card').forEach(card => card.classList.remove('active'));
+    document.querySelectorAll('.schedule-mode-card').forEach(card => card.classList.remove('active'));
     const checked = document.querySelector('input[name="schedule-mode"]:checked');
     if (checked) {
-        checked.parentElement.querySelector('.mode-card').classList.add('active');
+        const card = checked.parentElement.querySelector('.schedule-mode-card');
+        if (card) card.classList.add('active');
     }
 }
 
@@ -669,7 +670,13 @@ document.querySelectorAll('input[name="schedule-mode"]').forEach(radio => {
 });
 
 function updateWaitTimeDisplay(value) {
-    document.getElementById('wait-time-value').textContent = `${value}s`;
+    document.getElementById('wait-time-value').textContent = `${value}秒`;
+    // 更新滑块背景渐变
+    const slider = document.getElementById('config-wait-time');
+    if (slider) {
+        const percent = (value / 300) * 100;
+        slider.style.background = `linear-gradient(90deg, var(--accent-primary) ${percent}%, var(--bg-hover) ${percent}%)`;
+    }
 }
 
 async function saveConfig() {
@@ -706,12 +713,15 @@ async function saveConfig() {
     }
 }
 
-function refreshApiKey() {
+async function refreshApiKey() {
     if (!confirm('确定要刷新 API 密钥吗？现有的密钥将失效。')) return;
 
     const newKey = 'sk-' + generateRandomString(32);
     document.getElementById('api-key-value').textContent = newKey;
-    showToast('API 密钥已刷新，请保存设置');
+
+    // 自动保存配置
+    await saveConfig();
+    showToast('API 密钥已刷新并保存');
 }
 
 function copyApiKey() {
@@ -784,10 +794,25 @@ function formatDateTime(dateStr) {
     }
 }
 
+// 复制代码到剪贴板
+function copyCode(elementId) {
+    const codeElement = document.getElementById(elementId);
+    if (codeElement) {
+        const code = codeElement.textContent;
+        navigator.clipboard.writeText(code).then(() => {
+            showToast('代码已复制到剪贴板');
+        }).catch(() => {
+            showToast('复制失败', 'error');
+        });
+    }
+}
+
 // Initial load
 document.addEventListener('DOMContentLoaded', () => {
     loadDashboard();
     initCharts();
+    // 初始化调度模式卡片状态
+    setTimeout(updateModeCards, 100);
 });
 
 // ========== Charts ==========
